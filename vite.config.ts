@@ -19,6 +19,9 @@ export default defineConfig({
         return format === 'es' ? `${entryName}.js` : `${entryName}.cjs`;
       },
     },
+    rollupOptions: {
+      external: ['react', 'react-dom', 'mobx-view-model', 'react/jsx-runtime'],
+    },
     // rollupOptions: {
     //   input: {
     //     index: resolve(__dirname, 'src/index.ts'),
