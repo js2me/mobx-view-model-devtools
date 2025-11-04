@@ -5,7 +5,9 @@ import css from '@/styles.module.css';
 import { DevtoolsVM } from '@/model';
 
 export const VmDevtoolsButton = observer(() => {
-  const model = useViewModel<DevtoolsVM>(); 
+  const model = useViewModel(DevtoolsVM); 
+
+  console.log('ddd', model); 
 
   return (
     <button

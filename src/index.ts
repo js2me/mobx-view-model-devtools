@@ -1,1 +1,1 @@
-export * from "./ui/view-model-devtools"; 
+export * from './ui/view-model-devtools';

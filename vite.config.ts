@@ -20,7 +20,7 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'mobx-view-model', 'react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
     },
     // rollupOptions: {
     //   input: {
@@ -37,6 +37,13 @@ export default defineConfig({
         comments: false,
       },
     },
+  },
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+      generateScopedName: '[local]_[hash:base64:5]', // Опционально
+    },
+    postcss: './postcss.config.js',
   },
   mode: 'production',
   resolve: {
@@ -71,7 +78,7 @@ export default defineConfig({
                   baseUrl: '.',
                   paths: {
                     '@/*': ['./src/*'],
-                  }
+                  },
                 },
               }),
             ],

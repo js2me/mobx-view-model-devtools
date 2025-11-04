@@ -1,10 +1,11 @@
 {
   "name": "mobx-view-model-devtools",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "tsc --noEmit",
+    "build:watch": "vite build && nodemon --watch src --ext ts,tsx --exec \"vite build\"",
     "build": "cross-env NODE_ENV=production vite build"
   },
   "keywords": [],
@@ -23,6 +24,7 @@
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
     "@biomejs/biome": "2.2.6",
+    "@tailwindcss/postcss": "^4.1.16",
     "@tailwindcss/vite": "^4.1.16",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.10.0",
@@ -32,6 +34,9 @@
     "cross-env": "^10.1.0",
     "js2me-biome-config": "^1.0.6",
     "lefthook": "^1.11.16",
+    "nodemon": "^3.1.10",
+    "postcss": "^8.5.6",
+    "postcss-nested": "^7.0.2",
     "rollup": "^4.52.5",
     "rollup-plugin-dts": "^6.2.3",
     "tailwindcss": "^4.1.16",
@@ -45,7 +50,7 @@
     "mobx": "^6.15.0",
     "mobx-react-lite": "^4.1.1",
     "mobx-swiss-knife": "^1.10.0",
-    "mobx-view-model": "^8.6.1",
+    "mobx-view-model": "^8.7.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "virtua": "^0.46.5",

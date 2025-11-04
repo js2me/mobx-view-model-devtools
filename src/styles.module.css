@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-.vm-button {
+.vmButton {
   @apply fixed z-99 size-9 cursor-pointer rounded-lg font-mono transition-all;
 
   &[data-position="top-right"], &[data-position="undefined"] {
@@ -53,7 +53,7 @@
 }
 
 
-.vm-popup {
+.vmPopup {
   @apply fixed z-99 w-[520px] rounded-lg h-[calc(100vh_-_24px)];
 
   > header {
@@ -80,7 +80,7 @@
   }
 }
 
-.vm-content {
+.vmContent {
   color: rgb(204, 204, 204);
   @apply font-mono bg-[#1e1e1e] overflow-auto;
 
@@ -93,11 +93,11 @@
   }
 }
 
-.vm-content-tree {
+.vmContentTree {
   @apply flex flex-col px-2 py-2;
 }
 
-.vm-tree-item {
+.vmTreeItem {
   @apply flex flex-col;
 
   &.line {
@@ -122,7 +122,7 @@
   }
 }
 
-.vm-tree-item {
+.vmTreeItem {
   &:not([data-fitted='true']) {
     > header {
       opacity: 0.6;
@@ -130,7 +130,7 @@
   }
 }
 
-.vm-content-filters {
+.vmContentFilters {
   padding: 0 8px;
   position: sticky;
   top: 0;
@@ -148,7 +148,7 @@
   }
 }
 
-.property-meta {
+.propertyMeta {
   @apply text-[#616161] truncate;
 
   &.small {
@@ -157,7 +157,7 @@
   }
 }
 
-.property-value {
+.propertyValue {
   @apply text-[#616161] truncate;
 
   &:has(+.property-name) {
@@ -178,7 +178,7 @@
 
   padding-left: calc(10px + (var(--level) * 14px));
 
-  &:has(>.expand-button.expanded) {
+  &:has(>.expandButton.expanded) {
     position: sticky;
     top: calc(22px + 22px * (var(--level, 0) + 1));
   }
@@ -190,25 +190,25 @@
   }
 
   &.instance {
-    > .property-value {
+    > .propertyValue {
       color: rgb(186 130 190);
     }
   }
 
   &.primitive.boolean, &.primitive.number, &.primitive.object, &.primitive.undefined, &.primitive.bigint, &.primitive.symbol {
-    > .property-value {
+    > .propertyValue {
       color: rgb(89, 153, 205);
     } 
   }
 
   &.primitive.string {
-    > .property-value {
+    > .propertyValue {
       @apply text-[#af7249];
     }
   }
 }
 
-.expand-button {
+.expandButton {
   color: #a0a0a0;
   opacity: 1 !important;
   width: 16px;

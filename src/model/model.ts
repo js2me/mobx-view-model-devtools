@@ -9,19 +9,25 @@ import type { AnyVM, VMFittedInfo, VmTreeItem } from './types';
 import { checkPath } from './utils/check-path';
 import { createFocusableRef } from './utils/create-focusable-ref';
 import { getAllKeys } from './utils/get-all-keys';
+import { renderDevtools } from '@/ui/render-devtools';
+import { AnyObject } from 'yummies/types';
 
-export class DevtoolsVM extends DevtoolsVMImpl<{
-  viewModels?: ViewModelStoreBase;
+interface DevtoolsVMPayload {
+  defaultIsOpened?: boolean;
+  viewModels: ViewModelStoreBase;
   position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';
   buttonClassName?: string;
-}> {
-  isOpened = true;
+  extras?: AnyObject;
+}
+
+export class DevtoolsVM extends DevtoolsVMImpl<DevtoolsVMPayload> {
+  isOpened = !!this.payload.defaultIsOpened;
 
   displayType = 'popup';
 
   vmStore = new ViewModelStoreBase();
 
-  projectVmStore = this.viewModels;
+  projectVmStore = this.payload.viewModels!;
 
   handleToggleOpen = () => {
     this.isOpened = !this.isOpened;
@@ -41,15 +47,12 @@ export class DevtoolsVM extends DevtoolsVMImpl<{
 
   keyboardHandler = new KeyHanders(this);
 
-  constructor(vmParams: ViewModelParams) {
+  constructor(vmParams: ViewModelParams<DevtoolsVMPayload>) {
     super({
       ...vmParams,
       vmConfig: {
         observable: {
           viewModels: {
-            useDecorators: false,
-          },
-          viewModelStores: {
             useDecorators: false,
           },
         },
@@ -350,5 +353,12 @@ export class DevtoolsVM extends DevtoolsVMImpl<{
       this.projectVmStore) as ViewModelStoreBase;
 
     return ((vmStore as any)?.viewModels as Map<string, AnyVM>) ?? new Map();
+  }
+
+  willMount(): void {
+    this.vmStore.attach(this);
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    renderDevtools(container, this);
   }
 }
