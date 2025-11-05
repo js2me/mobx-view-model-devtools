@@ -1,11 +1,11 @@
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
+import { camelCase, upperFirst } from 'lodash-es';
 import { rollup } from 'rollup';
 import dts from 'rollup-plugin-dts';
 import { ConfigsManager, prepareDistDir } from 'sborshik/utils';
 import { build, defineConfig, type LibraryFormats } from 'vite';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
-import { camelCase, upperFirst } from "lodash-es"
 
 const createBundle = async ({
   configs,
@@ -17,21 +17,24 @@ const createBundle = async ({
   let fileName: string;
   let libraryFormats: LibraryFormats[];
   let emptyOutDir: boolean;
+  let sourceEntryFilePath: string;
 
   if (buildEnvs.version === 'default') {
     fileName = 'index';
     emptyOutDir = true;
     libraryFormats = ['cjs', 'es'];
+    sourceEntryFilePath = resolve(configs.rootPath, 'src/index.ts');
   } else {
     fileName = 'index.global';
     emptyOutDir = false;
     libraryFormats = ['es'];
+    sourceEntryFilePath = resolve(configs.rootPath, 'src/index.global.ts');
   }
 
   const viteConfig = defineConfig({
     appType: 'spa',
     define: {
-      "process.env.NODE_ENV": '"production"',
+      'process.env.NODE_ENV': '"production"',
       buildEnvs: JSON.stringify(buildEnvs),
     },
     build: {
@@ -41,7 +44,7 @@ const createBundle = async ({
       emptyOutDir,
       lib: {
         entry: {
-          [fileName]: resolve(configs.rootPath, 'src/index.ts'),
+          [fileName]: sourceEntryFilePath,
         },
         formats: libraryFormats,
         name:
