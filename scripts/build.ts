@@ -25,12 +25,13 @@ const createBundle = async ({
   } else {
     fileName = 'index.global';
     emptyOutDir = false;
-    libraryFormats = ['iife'];
+    libraryFormats = ['es'];
   }
 
   const viteConfig = defineConfig({
     appType: 'spa',
     define: {
+      "process.env.NODE_ENV": '"production"',
       buildEnvs: JSON.stringify(buildEnvs),
     },
     build: {
