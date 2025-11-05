@@ -1,4 +1,4 @@
-import { AnyObject } from "yummies/types";
+import type { AnyObject } from 'yummies/types';
 
 export const checkPath = (obj: AnyObject, path: string) => {
   const parts = path.split('.');

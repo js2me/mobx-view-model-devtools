@@ -1,1 +1,9 @@
-export * from './ui/view-model-devtools';
+import { ViewModelDevtools } from './model';
+
+export { ViewModelDevtools };
+
+if (buildEnvs.version === 'global') {
+  Object.assign(globalThis, {
+    ViewModelDevtools,
+  });
+}

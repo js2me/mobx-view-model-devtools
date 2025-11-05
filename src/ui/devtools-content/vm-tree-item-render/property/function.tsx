@@ -1,6 +1,6 @@
-import { cx } from 'yummies/css';
 import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
+import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
 import type { PropertyDetailedProps } from '.';
@@ -17,7 +17,9 @@ export const FunctionProperty = observer((props: PropertyDetailedProps) => {
     <div
       className={cx(css.line, css.property, css.function)}
       title={String(value)}
-      style={{ '--level': props.level, '--order': props.order } as CSSProperties}
+      style={
+        { '--level': props.level, '--order': props.order } as CSSProperties
+      }
       data-fitted={props.isFitted}
     >
       <ExpandButton />

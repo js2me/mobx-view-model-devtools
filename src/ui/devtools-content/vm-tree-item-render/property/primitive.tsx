@@ -1,6 +1,6 @@
-import { cx } from 'yummies/css';
 import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
+import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
 import type { PropertyDetailedProps } from '.';

@@ -1,18 +1,32 @@
-import { debounce } from 'lodash-es';
-import { action, computed, makeObservable, observable, reaction } from 'mobx';
-import { type ViewModelParams, ViewModelStoreBase } from 'mobx-view-model';
-import type { ChangeEventHandler } from 'react';
-import { createRef } from 'yummies/mobx';
-import { KeyHanders } from './key-handlers';
+import {
+  action,
+  computed,
+  makeObservable,
+  type ObservableSet,
+  observable,
+} from 'mobx';
+import {
+  type AnyViewModel,
+  type ViewModelParams,
+  ViewModelStoreBase,
+} from 'mobx-view-model';
+import { type ChangeEventHandler, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createRef, type Ref } from 'yummies/mobx';
+import type { AnyObject, Maybe } from 'yummies/types';
+import { DevtoolsClient } from '@/ui/devtools-client';
+import { KeyboardHandler } from './keyboard-handler';
 import { DevtoolsVMImpl } from './lib/devtools-vm.impl';
 import type { AnyVM, VMFittedInfo, VmTreeItem } from './types';
 import { checkPath } from './utils/check-path';
-import { createFocusableRef } from './utils/create-focusable-ref';
+import {
+  createFocusableRef,
+  type FocusableRef,
+} from './utils/create-focusable-ref';
 import { getAllKeys } from './utils/get-all-keys';
-import { renderDevtools } from '@/ui/render-devtools';
-import { AnyObject } from 'yummies/types';
 
-interface DevtoolsVMPayload {
+export interface ViewModelDevtoolsConfig {
+  containerId?: string;
   defaultIsOpened?: boolean;
   viewModels: ViewModelStoreBase;
   position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';
@@ -20,80 +34,21 @@ interface DevtoolsVMPayload {
   extras?: AnyObject;
 }
 
-export class DevtoolsVM extends DevtoolsVMImpl<DevtoolsVMPayload> {
-  isOpened = !!this.payload.defaultIsOpened;
+export class ViewModelDevtools {
+  isOpened: boolean;
+  displayType: string;
+  vmStore: ViewModelStoreBase;
+  projectVmStore: ViewModelStoreBase<AnyViewModel>;
+  isAllVmsExpandedByDefault: boolean;
+  expandedVmItemsPaths: ObservableSet<string>;
+  logoUrl: string;
+  inputRef: FocusableRef<HTMLInputElement>;
+  containerRef: FocusableRef<HTMLDivElement>;
+  buttonRef: Ref<HTMLButtonElement>;
+  keyboardHandler: KeyboardHandler;
+  search: string;
 
-  displayType = 'popup';
-
-  vmStore = new ViewModelStoreBase();
-
-  projectVmStore = this.payload.viewModels!;
-
-  handleToggleOpen = () => {
-    this.isOpened = !this.isOpened;
-  };
-
-  private expandedVmsSet = observable.set();
-
-  isAllVmsExpandedByDefault = true;
-
-  expandedVmItemsPaths = observable.set<string>();
-
-  logoUrl = 'https://js2me.github.io/mobx-view-model/logo.png';
-
-  inputRef = createFocusableRef<HTMLInputElement>();
-  containerRef = createFocusableRef<HTMLDivElement>();
-  buttonRef = createRef();
-
-  keyboardHandler = new KeyHanders(this);
-
-  constructor(vmParams: ViewModelParams<DevtoolsVMPayload>) {
-    super({
-      ...vmParams,
-      vmConfig: {
-        observable: {
-          viewModels: {
-            useDecorators: false,
-          },
-        },
-      },
-    });
-
-    makeObservable<typeof this, 'vmMap'>(this, {
-      isOpened: observable.ref,
-      isAllVmsExpandedByDefault: observable,
-      search: observable.ref,
-      handleToggleOpen: action,
-      handleExpandPropertyClick: action,
-      allVms: computed.struct,
-      vmMap: computed.struct,
-      isInSearch: computed,
-      vmTree: computed.struct,
-      rootVms: computed.struct,
-      handleSearchChange: action,
-    });
-
-    const debouncedFocusOnFittedElement = debounce(([search]) => {
-      if (search) {
-        document.querySelector('[data-fitted="true"]')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
-        });
-      }
-    }, 140);
-
-    reaction(
-      () =>
-        [
-          this.formattedSearch,
-          this.allVms,
-          this.isAllVmsExpandedByDefault,
-        ] as const,
-      debouncedFocusOnFittedElement,
-      { signal: this.unmountSignal },
-    );
-  }
+  private expandedVmsSet: ObservableSet<string>;
 
   private get vmMap() {
     return this.getViewModelsMap();
@@ -111,8 +66,6 @@ export class DevtoolsVM extends DevtoolsVMImpl<DevtoolsVMPayload> {
       return !vmParams || vmParams.parentViewModel == null;
     });
   }
-
-  search = '';
 
   get formattedSearch() {
     return this.search.toLowerCase().trim();
@@ -340,6 +293,10 @@ export class DevtoolsVM extends DevtoolsVMImpl<DevtoolsVMPayload> {
     this.search = e.target.value;
   };
 
+  handleToggleOpen = () => {
+    this.isOpened = !this.isOpened;
+  };
+
   private getVmParams(vm: AnyVM): null | ViewModelParams {
     if ('vmParams' in vm) {
       return vm.vmParams as ViewModelParams;
@@ -349,16 +306,61 @@ export class DevtoolsVM extends DevtoolsVMImpl<DevtoolsVMPayload> {
   }
 
   private getViewModelsMap() {
-    const vmStore = (this.payload.viewModels ??
+    const vmStore = (this.config.viewModels ??
       this.projectVmStore) as ViewModelStoreBase;
 
     return ((vmStore as any)?.viewModels as Map<string, AnyVM>) ?? new Map();
   }
 
-  willMount(): void {
-    this.vmStore.attach(this);
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    renderDevtools(container, this);
+  constructor(public config: ViewModelDevtoolsConfig) {
+    this.isOpened = !!this.config.defaultIsOpened;
+    this.search = '';
+    this.displayType = 'popup';
+    this.vmStore = new ViewModelStoreBase();
+    this.projectVmStore = this.config.viewModels;
+    this.expandedVmsSet = observable.set();
+    this.isAllVmsExpandedByDefault = true;
+    this.expandedVmItemsPaths = observable.set<string>();
+    this.logoUrl = 'https://js2me.github.io/mobx-view-model/logo.png';
+    this.inputRef = createFocusableRef<HTMLInputElement>();
+    this.containerRef = createFocusableRef<HTMLDivElement>();
+    this.buttonRef = createRef<HTMLButtonElement>();
+    this.keyboardHandler = new KeyboardHandler(this);
+
+    makeObservable<typeof this, 'vmMap'>(this, {
+      isOpened: observable.ref,
+      isAllVmsExpandedByDefault: observable,
+      search: observable.ref,
+      handleToggleOpen: action,
+      handleExpandPropertyClick: action,
+      allVms: computed.struct,
+      vmMap: computed.struct,
+      isInSearch: computed,
+      vmTree: computed.struct,
+      rootVms: computed.struct,
+      handleSearchChange: action,
+    });
+  }
+
+  render() {
+    const containerId = this.config.containerId ?? 'view-model-devtools';
+
+    let existedContainer = document.querySelector(
+      `#${containerId}`,
+    ) as Maybe<HTMLDivElement>;
+
+    if (!existedContainer) {
+      existedContainer = document.createElement('div');
+      existedContainer.style = 'display: contents;';
+      existedContainer.id = containerId;
+      document.body.appendChild(existedContainer);
+    }
+
+    const root = createRoot(existedContainer);
+    root.render(createElement(DevtoolsClient, { payload: { devtools: this } }));
+  }
+
+  static connect(config: ViewModelDevtoolsConfig) {
+    new ViewModelDevtools(config);
   }
 }

@@ -1,13 +1,22 @@
-import { DevtoolsVM, DevtoolsVMImpl, VmTreeItem } from '@/model';
-import { action, computed, makeObservable } from 'mobx';
+import { action, makeObservable } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
+import {
+  DevtoolsVMImpl,
+  type ViewModelDevtools,
+  type VmTreeItem,
+} from '@/model';
 
-type VmTreeItemRenderPayload = { vmItem: VmTreeItem; devtoolsVM: DevtoolsVM };
+type VmTreeItemRenderPayload = {
+  vmItem: VmTreeItem;
+  devtools: ViewModelDevtools;
+};
 
 export class VmTreeItemRenderVM extends DevtoolsVMImpl<
   VmTreeItemRenderPayload,
   VmTreeItemRenderVM
 > {
+  devtools = this.payload.devtools;
+
   constructor(vmParams: ViewModelParams<any, any>) {
     super({
       ...vmParams,
@@ -24,25 +33,20 @@ export class VmTreeItemRenderVM extends DevtoolsVMImpl<
     });
 
     makeObservable<typeof this>(this, {
-      devtoolsVM: computed.struct,
       handleExpandPropertyClick: action,
       handleVmItemHeaderClick: action,
     });
   }
 
-  get devtoolsVM() {
-    return this.payload.devtoolsVM;
-  }
-
   isPathExpanded(path: string) {
-    return this.devtoolsVM.checkIsPathExpanded(this.payload.vmItem, path);
+    return this.devtools.checkIsPathExpanded(this.payload.vmItem, path);
   }
 
   handleExpandPropertyClick(path: string): void {
-    this.devtoolsVM.handleExpandPropertyClick(this.payload.vmItem, path);
+    this.devtools.handleExpandPropertyClick(this.payload.vmItem, path);
   }
 
   handleVmItemHeaderClick(vmItem: VmTreeItem): void {
-    this.devtoolsVM.handleVmItemHeaderClick(vmItem);
+    this.devtools.handleVmItemHeaderClick(vmItem);
   }
 }

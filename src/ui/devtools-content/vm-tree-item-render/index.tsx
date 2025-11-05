@@ -1,18 +1,18 @@
-import { cx } from 'yummies/css';
 import { withViewModel } from 'mobx-view-model';
 import type { CSSProperties } from 'react';
+import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
-import { VmTreeItemRenderVM } from './model';
+import { VmTreeItemRenderVM } from '../../../model';
 import { Property } from './property';
 
 export const VmTreeItemRender = withViewModel(
   VmTreeItemRenderVM,
   ({ model }) => {
     const vmItem = model.payload.vmItem;
-    const isExpanded = model.devtoolsVM.isExpanded(vmItem);
+    const isExpanded = model.devtools.isExpanded(vmItem);
 
-    const fittedInfo = model.devtoolsVM.getVMFittedInfo(vmItem);
+    const fittedInfo = model.devtools.getVMFittedInfo(vmItem);
 
     return (
       <>
@@ -25,7 +25,7 @@ export const VmTreeItemRender = withViewModel(
             <ExpandButton
               expandable={vmItem.children.length > 0}
               expanded={isExpanded}
-              disabled={model.devtoolsVM.isAllVmsExpandedByDefault}
+              disabled={model.devtools.isAllVmsExpandedByDefault}
             />
             <label title={vmItem.displayName}>{vmItem.displayName}</label>
             <span title={vmItem.vm.id}>{vmItem.vm.id}</span>
@@ -38,7 +38,7 @@ export const VmTreeItemRender = withViewModel(
             order={order}
             value={(vmItem.vm as any)[property]}
             key={property}
-            isFitted={model.devtoolsVM.checkIsPropertyFitted(vmItem, property)}
+            isFitted={model.devtools.checkIsPropertyFitted(vmItem, property)}
             level={vmItem.depth}
             path={property}
           />
@@ -47,7 +47,7 @@ export const VmTreeItemRender = withViewModel(
           vmItem.children.map((child) => (
             <VmTreeItemRender
               key={child.key}
-              payload={{ vmItem: child, devtoolsVM: model.devtoolsVM }}
+              payload={{ vmItem: child, devtools: model.devtools }}
             />
           ))}
       </>

@@ -1,14 +1,14 @@
 import { observer } from 'mobx-react-lite';
 import { typeGuard } from 'yummies/type-guard';
+import type { VmTreeItem } from '@/model';
 import { ArrayProperty } from './array';
 import { FunctionProperty } from './function';
 import { InstanceProperty } from './instance';
 import { ObjectProperty } from './object';
 import { PrimitiveProperty } from './primitive';
-import { VmTreeItem } from '@/model';
 
 export interface PropertyProps {
-  vmItem: VmTreeItem;  
+  vmItem: VmTreeItem;
   name: string;
   value: any;
   level: number;

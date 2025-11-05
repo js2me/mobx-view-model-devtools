@@ -1,10 +1,10 @@
-import { cx } from 'yummies/css';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
 import { Virtualizer } from 'virtua';
+import { cx } from 'yummies/css';
+import type { DevtoolsClientVM } from '@/model';
 import css from '@/styles.module.css';
-import { DevtoolsVM } from '@/model';
 import { VmTreeItemRender } from './vm-tree-item-render';
 
 export const VmDevtoolsContent = observer(
@@ -16,13 +16,13 @@ export const VmDevtoolsContent = observer(
     className?: string;
     headerContent?: ReactNode;
   }) => {
-    const model = useViewModel<DevtoolsVM>();
+    const model = useViewModel<DevtoolsClientVM>();
 
     return (
       <div
         {...props}
         className={cx(css.vmContent, className)}
-        ref={model.containerRef}
+        ref={model.devtools.containerRef}
       >
         <header>
           <span>mobx-view-model devtools</span>
@@ -30,18 +30,18 @@ export const VmDevtoolsContent = observer(
         </header>
         <div className={css.vmContentFilters}>
           <input
-            value={model.search}
-            ref={model.inputRef}
+            value={model.devtools.search}
+            ref={model.devtools.inputRef}
             autoFocus
             placeholder="search by property path or ViewModel name"
-            onChange={model.handleSearchChange}
+            onChange={model.devtools.handleSearchChange}
           />
         </div>
         <div className={css.vmContentTree}>
           <Virtualizer>
-            {model.vmTree.map((vmItem) => (
+            {model.devtools.vmTree.map((vmItem) => (
               <VmTreeItemRender
-                payload={{ vmItem, devtoolsVM: model }}
+                payload={{ vmItem, devtools: model.devtools }}
                 key={vmItem.key}
               />
             ))}

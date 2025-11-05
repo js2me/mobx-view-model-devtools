@@ -1,7 +1,12 @@
 import { action, runInAction } from 'mobx';
-import { createRef } from 'yummies/mobx';
+import { createRef, type Ref } from 'yummies/mobx';
 
-export const createFocusableRef = <T extends HTMLElement = HTMLElement>() => {
+export interface FocusableRef<T extends HTMLElement = HTMLElement>
+  extends Ref<T, { focused: boolean }> {}
+
+export const createFocusableRef = <
+  T extends HTMLElement = HTMLElement,
+>(): FocusableRef<T> => {
   const ref = createRef({
     meta: {
       focused: false,

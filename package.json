@@ -1,29 +1,20 @@
 {
   "name": "mobx-view-model-devtools",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
-  "main": "dist/index.js",
   "scripts": {
     "prebuild": "tsc --noEmit",
     "build:watch": "vite build && nodemon --watch src --ext ts,tsx --exec \"vite build\"",
-    "build": "cross-env NODE_ENV=production vite build"
+    "build": "cross-env NODE_ENV=production tsx scripts/build",
+    "lint": "biome check",
+    "lint:fix": "pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   },
   "keywords": [],
   "author": "js2me",
   "license": "ISC",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
-  },
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
-    "@biomejs/biome": "2.2.6",
+    "@biomejs/biome": "2.3.3",
     "@tailwindcss/postcss": "^4.1.16",
     "@tailwindcss/vite": "^4.1.16",
     "@types/lodash-es": "^4.17.12",
@@ -32,15 +23,17 @@
     "@types/react-dom": "^18.3.7",
     "commitfmt": "^1.0.4",
     "cross-env": "^10.1.0",
-    "js2me-biome-config": "^1.0.6",
+    "js2me-biome-config": "^1.0.8",
     "lefthook": "^1.11.16",
     "nodemon": "^3.1.10",
     "postcss": "^8.5.6",
     "postcss-nested": "^7.0.2",
     "rollup": "^4.52.5",
     "rollup-plugin-dts": "^6.2.3",
+    "sborshik": "^1.9.12",
     "tailwindcss": "^4.1.16",
     "terser": "^5.44.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
     "vite-plugin-css-injected-by-js": "^3.5.2"

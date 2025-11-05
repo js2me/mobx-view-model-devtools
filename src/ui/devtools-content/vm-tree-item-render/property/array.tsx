@@ -1,10 +1,10 @@
-import { cx } from 'yummies/css';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
 import type { CSSProperties } from 'react';
+import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
-import type { VmTreeItemRenderVM } from '../model';
+import type { VmTreeItemRenderVM } from '../../../../model/vm-tree-item-render.vm';
 import { Property, type PropertyDetailedProps } from '.';
 
 export const ArrayProperty = observer((props: PropertyDetailedProps) => {
@@ -19,7 +19,9 @@ export const ArrayProperty = observer((props: PropertyDetailedProps) => {
     <>
       <div
         className={cx(css.line, css.property, css.array)}
-        style={{ '--level': props.level, '--order': props.order } as CSSProperties}
+        style={
+          { '--level': props.level, '--order': props.order } as CSSProperties
+        }
         onClick={() => model.handleExpandPropertyClick(props.path)}
         data-fitted={props.isFitted}
       >

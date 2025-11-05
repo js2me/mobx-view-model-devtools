@@ -1,34 +1,36 @@
-import { KeyboardHandler, type KeyboardHandlerAction } from 'mobx-swiss-knife';
-import type { DevtoolsVM } from './model';
+import {
+  type KeyboardHandlerAction,
+  KeyboardHandler as KeyboardHandlerLib,
+} from 'mobx-swiss-knife';
+import type { ViewModelDevtools } from './view-model-devtools';
 
-export class KeyHanders extends KeyboardHandler<KeyboardHandlerAction> {
-  constructor(vm: DevtoolsVM) {
+export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
+  constructor(devtools: ViewModelDevtools) {
     super({
-      abortSignal: vm.unmountSignal,
       actions: [
         {
           shortcuts: ['Ctrl+Shift+F12'],
           action: () => {
-            vm.handleToggleOpen();
+            devtools.handleToggleOpen();
           },
         },
         {
           shortcuts: ['Ctrl+ArrowLeft'],
           action: () => {
-            vm.isAllVmsExpandedByDefault = false;
+            devtools.isAllVmsExpandedByDefault = false;
           },
         },
         {
           shortcuts: ['Ctrl+ArrowRight'],
           action: () => {
-            vm.isAllVmsExpandedByDefault = true;
+            devtools.isAllVmsExpandedByDefault = true;
           },
         },
         {
           shortcuts: ['Ctrl+ArrowDown'],
           action: () => {
             requestAnimationFrame(() => {
-              vm.containerRef.current!.scrollTop += 200;
+              devtools.containerRef.current!.scrollTop += 200;
             });
           },
         },
@@ -36,7 +38,7 @@ export class KeyHanders extends KeyboardHandler<KeyboardHandlerAction> {
           shortcuts: ['Ctrl+ArrowUp'],
           action: () => {
             requestAnimationFrame(() => {
-              vm.containerRef.current!.scrollTop -= 200;
+              devtools.containerRef.current!.scrollTop -= 200;
             });
           },
         },

@@ -1,30 +1,28 @@
-import { cx } from 'yummies/css';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
+import { cx } from 'yummies/css';
+import type { DevtoolsClientVM } from '@/model';
 import css from '@/styles.module.css';
-import { DevtoolsVM } from '@/model';
 
 export const VmDevtoolsButton = observer(() => {
-  const model = useViewModel(DevtoolsVM); 
-
-  console.log('ddd', model); 
+  const model = useViewModel<DevtoolsClientVM>();
 
   return (
     <button
       className={cx(
         css.vmButton,
         {
-          [css.opened]: model.isOpened,
+          [css.opened]: model.devtools.isOpened,
         },
-        model.payload.buttonClassName,
+        model.devtools.config.buttonClassName,
       )}
-      data-position={`${model.payload.position}`}
-      ref={model.buttonRef}
-      onClick={model.handleToggleOpen}
+      data-position={`${model.devtools.config.position}`}
+      ref={model.devtools.buttonRef}
+      onClick={model.devtools.handleToggleOpen}
     >
-      <img src={model.logoUrl} />
+      <img src={model.devtools.logoUrl} />
       <div />
-      <span>{model.allVms.length}</span>
+      <span>{model.devtools.allVms.length}</span>
     </button>
   );
 });

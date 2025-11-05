@@ -1,18 +1,18 @@
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
+import type { DevtoolsClientVM } from '@/model';
 import css from '@/styles.module.css';
-import { DevtoolsVM } from '@/model';
 import { VmDevtoolsContent } from '../devtools-content';
 
 export const VmDevtoolsPopup = observer(() => {
-  const model = useViewModel<DevtoolsVM>();
+  const model = useViewModel<DevtoolsClientVM>();
 
   return (
     <VmDevtoolsContent
       className={css.vmPopup}
-      data-position={`${model.payload.position}`}
+      data-position={`${model.devtools.config.position}`}
       headerContent={
-        <button onClick={model.handleToggleOpen}>
+        <button onClick={model.devtools.handleToggleOpen}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -30,4 +30,3 @@ export const VmDevtoolsPopup = observer(() => {
     />
   );
 });
- 

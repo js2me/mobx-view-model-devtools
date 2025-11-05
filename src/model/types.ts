@@ -1,5 +1,5 @@
 import type { AnyViewModel, AnyViewModelSimple } from 'mobx-view-model';
-import { Maybe } from 'yummies/types';
+import type { Maybe } from 'yummies/types';
 
 export type AnyVM = AnyViewModelSimple | AnyViewModel;
 

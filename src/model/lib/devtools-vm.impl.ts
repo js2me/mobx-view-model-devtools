@@ -3,7 +3,7 @@ import {
   type AnyViewModelSimple,
   ViewModelBase,
 } from 'mobx-view-model';
-import { AnyObject, EmptyObject } from 'yummies/types';
+import type { AnyObject, EmptyObject } from 'yummies/types';
 
 export class DevtoolsVMImpl<
   Payload extends AnyObject = EmptyObject,
