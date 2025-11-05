@@ -5,6 +5,7 @@ import dts from 'rollup-plugin-dts';
 import { ConfigsManager, prepareDistDir } from 'sborshik/utils';
 import { build, defineConfig, type LibraryFormats } from 'vite';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
+import { camelCase, upperFirst } from "lodash-es"
 
 const createBundle = async ({
   configs,
@@ -24,7 +25,7 @@ const createBundle = async ({
   } else {
     fileName = 'index.global';
     emptyOutDir = false;
-    libraryFormats = ['es'];
+    libraryFormats = ['iife'];
   }
 
   const viteConfig = defineConfig({
@@ -42,9 +43,12 @@ const createBundle = async ({
           [fileName]: resolve(configs.rootPath, 'src/index.ts'),
         },
         formats: libraryFormats,
+        name:
+          libraryFormats.includes('iife') || libraryFormats.includes('umd')
+            ? upperFirst(camelCase(configs.package.name))
+            : undefined,
         fileName: (format, entryName) => {
-          console.log('ddd', format, entryName);
-          return format === 'es' ? `${entryName}.js` : `${entryName}.cjs`;
+          return format === 'cjs' ? `${entryName}.cjs` : `${entryName}.js`;
         },
       },
       rollupOptions: {
@@ -138,9 +142,7 @@ const main = async () => {
 
   await prepareDistDir({
     configs,
-    ignoredModuleNamesForExport: [
-      'index.global'
-    ]
+    ignoredModuleNamesForExport: ['index.global'],
   });
 };
 

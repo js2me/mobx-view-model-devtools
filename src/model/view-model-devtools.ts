@@ -340,6 +340,8 @@ export class ViewModelDevtools {
       rootVms: computed.struct,
       handleSearchChange: action,
     });
+
+    this.render();
   }
 
   render() {
