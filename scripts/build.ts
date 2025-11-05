@@ -52,7 +52,7 @@ const createBundle = async ({
         },
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime'],
+        external: [],
       },
       terserOptions: {
         format: {
