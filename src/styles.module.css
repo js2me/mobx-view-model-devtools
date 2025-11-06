@@ -5,7 +5,7 @@
 }
 
 .vmButton {
-  @apply fixed z-99 size-9 cursor-pointer rounded-lg font-mono transition-all;
+  @apply fixed z-99 size-9 cursor-pointer rounded-lg transition-all;
 
   &[data-position="top-right"], &[data-position="undefined"] {
     @apply top-3 right-3;
@@ -90,14 +90,10 @@
 
 .vmContent {
   color: rgb(204, 204, 204);
-  @apply font-mono bg-[#1e1e1e] overflow-auto flex flex-col;
+  @apply bg-[#1e1e1e] overflow-auto flex flex-col;
 
   > header {
     @apply flex justify-between h-8 items-center pl-2 font-semibold;
-  }
-
-  * {
-    @apply font-mono;
   }
 }
 
@@ -179,7 +175,7 @@
 }
 
 .line {
-  @apply flex items-center text-[14px] truncate whitespace-pre font-mono;
+  @apply flex items-center text-[14px] truncate whitespace-pre;
   background: #1e1e1e;
 
   height: 22px;
