@@ -18,7 +18,7 @@ import { DevtoolsClient } from '@/ui/devtools-client';
 import { KeyboardHandler } from './keyboard-handler';
 import { ViewModelImpl } from './lib/view-model.impl';
 import { ViewModelStoreImpl } from './lib/view-model-store.impl';
-import type { AnyVM, VMFittedInfo, VmTreeItem } from './types';
+import type { AnyVM, FittedInfo, VmTreeItem } from './types';
 import { checkPath } from './utils/check-path';
 import {
   createFocusableRef,
@@ -29,7 +29,7 @@ import { getAllKeys } from './utils/get-all-keys';
 export interface ViewModelDevtoolsConfig {
   containerId?: string;
   defaultIsOpened?: boolean;
-  viewModels: ViewModelStoreBase;
+  viewModels?: ViewModelStoreBase;
   position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';
   buttonClassName?: string;
   extras?: AnyObject;
@@ -39,7 +39,8 @@ export class ViewModelDevtools {
   isPopupOpened: boolean;
   displayType: string;
   vmStore: ViewModelStoreBase;
-  projectVmStore: ViewModelStoreBase<AnyViewModel>;
+  projectVmStore?: Maybe<ViewModelStoreBase<AnyViewModel>>;
+  extras: Maybe<AnyObject>;
   isAllVmsExpandedByDefault: boolean;
   expandedVmItemsPaths: ObservableSet<string>;
   logoUrl: string;
@@ -51,12 +52,12 @@ export class ViewModelDevtools {
 
   private expandedVmsSet: ObservableSet<string>;
 
-  private get vmMap() {
-    return this.getViewModelsMap();
-  }
-
   get allVms() {
-    return [...this.vmMap.values()].filter(
+    const vmStore = this.projectVmStore as Maybe<ViewModelStoreBase>;
+    const viewModelsMap =
+      ((vmStore as any)?.viewModels as Map<string, AnyVM>) ?? new Map();
+
+    return [...viewModelsMap.values()].filter(
       (vm) => !ViewModelImpl.isPrototypeOf(vm.constructor),
     );
   }
@@ -126,16 +127,20 @@ export class ViewModelDevtools {
     return result;
   }
 
+  get isActive() {
+    return !!this.projectVmStore || Object.keys(this.extras || {}).length > 0;
+  }
+
   get isInSearch() {
     return !!this.search.toLowerCase().trim();
   }
 
   private get searchCache() {
     this.formattedSearch;
-    return new Map<string, VMFittedInfo>();
+    return new Map<string, FittedInfo>();
   }
 
-  getVMFittedInfo(vmTreeItem: VmTreeItem): VMFittedInfo {
+  getVMFittedInfo(vmTreeItem: VmTreeItem): FittedInfo {
     if (!this.isInSearch) {
       return {
         isFitted: true,
@@ -246,6 +251,14 @@ export class ViewModelDevtools {
     return this.getVMFittedInfo(vmItem).fittedProperties.includes(property);
   }
 
+  checkIsExtrasPropertyFitted(property: string): boolean {
+    if (!this.isInSearch) {
+      return true;
+    }
+
+    return this.formattedSearch.includes(property.toLowerCase());
+  }
+
   isExpanded(vmItem: VmTreeItem) {
     return (
       this.expandedVmsSet.has(vmItem.key) ||
@@ -254,7 +267,7 @@ export class ViewModelDevtools {
     );
   }
 
-  checkIsPathExpanded(vmItem: VmTreeItem, path: string) {
+  checkIsVmPathExpanded(vmItem: VmTreeItem, path: string) {
     const vmFittedInfo = this.getVMFittedInfo(vmItem);
 
     const firstPathSegment = (
@@ -271,8 +284,22 @@ export class ViewModelDevtools {
     return this.expandedVmItemsPaths.has(`${vmItem.key}%%%${path}`);
   }
 
-  handleExpandPropertyClick(vmItem: VmTreeItem, path: string) {
+  checkIsExtraPathExpanded(path: string) {
+    return this.expandedVmItemsPaths.has(path);
+  }
+
+  handleExpandVmPropertyClick(vmItem: VmTreeItem, path: string) {
     const expandedKey = `${vmItem.key}%%%${path}`;
+
+    if (this.expandedVmItemsPaths.has(expandedKey)) {
+      this.expandedVmItemsPaths.delete(expandedKey);
+    } else {
+      this.expandedVmItemsPaths.add(expandedKey);
+    }
+  }
+
+  handleExpandExtraPropertyClick(path: string) {
+    const expandedKey = `__EXTRA__%%%${path}`;
 
     if (this.expandedVmItemsPaths.has(expandedKey)) {
       this.expandedVmItemsPaths.delete(expandedKey);
@@ -301,17 +328,11 @@ export class ViewModelDevtools {
     return null;
   }
 
-  private getViewModelsMap() {
-    const vmStore = (this.config.viewModels ??
-      this.projectVmStore) as ViewModelStoreBase;
-
-    return ((vmStore as any)?.viewModels as Map<string, AnyVM>) ?? new Map();
-  }
-
-  constructor(public config: ViewModelDevtoolsConfig) {
+  private constructor(public config: ViewModelDevtoolsConfig) {
     this.isPopupOpened = !!this.config.defaultIsOpened;
     this.search = '';
     this.displayType = 'popup';
+    this.extras = this.config.extras;
     this.vmStore = new ViewModelStoreImpl();
     this.projectVmStore = this.config.viewModels;
     this.expandedVmsSet = observable.set();
@@ -323,13 +344,18 @@ export class ViewModelDevtools {
     this.buttonRef = createRef<HTMLButtonElement>();
     this.keyboardHandler = new KeyboardHandler(this);
 
-    makeObservable<typeof this, 'vmMap' | 'searchCache'>(this, {
+    makeObservable<typeof this, 'searchCache'>(this, {
       isPopupOpened: observable.ref,
       isAllVmsExpandedByDefault: observable,
       search: observable.ref,
-      handleExpandPropertyClick: action,
+      projectVmStore: observable.ref,
+      extras: observable.ref,
+      setStore: action,
+      setExtras: action,
+      handleExpandVmPropertyClick: action,
+      handleExpandExtraPropertyClick: action,
       allVms: computed.struct,
-      vmMap: computed.struct,
+      isActive: computed,
       isInSearch: computed,
       vmTree: computed.struct,
       rootVms: computed.struct,
@@ -338,6 +364,14 @@ export class ViewModelDevtools {
     });
 
     this.render();
+  }
+
+  setStore(viewModels: ViewModelStoreBase<AnyViewModel> | undefined) {
+    this.projectVmStore = viewModels;
+  }
+
+  setExtras(extras: Maybe<AnyObject>) {
+    this.extras = extras;
   }
 
   render() {
@@ -351,14 +385,51 @@ export class ViewModelDevtools {
       existedContainer = document.createElement('div');
       existedContainer.style = 'display: contents;';
       existedContainer.id = containerId;
-      document.body.appendChild(existedContainer);
+
+      if (document.body) {
+        document.body.appendChild(existedContainer);
+      } else {
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.appendChild(existedContainer!);
+        });
+      }
     }
 
     const root = createRoot(existedContainer);
     root.render(createElement(DevtoolsClient, { payload: { devtools: this } }));
   }
 
-  static connect(config: ViewModelDevtoolsConfig) {
-    new ViewModelDevtools(config);
+  private static _instance: ViewModelDevtools | null = null;
+
+  static define(config?: ViewModelDevtoolsConfig) {
+    if (!ViewModelDevtools._instance) {
+      ViewModelDevtools._instance = new ViewModelDevtools(config ?? {});
+    }
+
+    return ViewModelDevtools._instance;
+  }
+
+  static connect(
+    viewModels: ViewModelDevtoolsConfig['viewModels'],
+    extras?: AnyObject,
+  ) {
+    const devtools = ViewModelDevtools.define();
+
+    devtools.setStore(viewModels);
+    devtools.setExtras(extras);
+
+    return devtools;
+  }
+
+  static connectViewModels(viewModels: ViewModelDevtoolsConfig['viewModels']) {
+    const devtools = ViewModelDevtools.define();
+    devtools.setStore(viewModels);
+    return devtools;
+  }
+
+  static connectExtras(extras: AnyObject) {
+    const devtools = ViewModelDevtools.define();
+    devtools.setExtras(extras);
+    return devtools;
   }
 }

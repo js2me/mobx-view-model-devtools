@@ -1,18 +1,15 @@
 import { action, makeObservable } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
+import type { AnyObject } from 'yummies/types';
 import { ViewModelImpl } from './lib/view-model.impl';
-import type { VmTreeItem } from './types';
 import type { ViewModelDevtools } from './view-model-devtools';
 
-type VmTreeItemRenderPayload = {
-  vmItem: VmTreeItem;
+type ExtrasItemRenderPayload = {
+  extras: AnyObject;
   devtools: ViewModelDevtools;
 };
 
-export class VmTreeItemRenderVM extends ViewModelImpl<
-  VmTreeItemRenderPayload,
-  VmTreeItemRenderVM
-> {
+export class ExtrasItemRenderVM extends ViewModelImpl<ExtrasItemRenderPayload> {
   devtools = this.payload.devtools;
 
   constructor(vmParams: ViewModelParams<any, any>) {
@@ -20,19 +17,14 @@ export class VmTreeItemRenderVM extends ViewModelImpl<
 
     makeObservable<typeof this>(this, {
       handleExpandPropertyClick: action,
-      handleVmItemHeaderClick: action,
     });
   }
 
   isPathExpanded(path: string) {
-    return this.devtools.checkIsVmPathExpanded(this.payload.vmItem, path);
+    return this.devtools.checkIsExtraPathExpanded(path);
   }
 
   handleExpandPropertyClick(path: string): void {
-    this.devtools.handleExpandVmPropertyClick(this.payload.vmItem, path);
-  }
-
-  handleVmItemHeaderClick(vmItem: VmTreeItem): void {
-    this.devtools.handleVmItemHeaderClick(vmItem);
+    this.devtools.handleExpandExtraPropertyClick(path);
   }
 }

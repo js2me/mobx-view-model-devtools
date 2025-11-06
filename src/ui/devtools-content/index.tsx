@@ -5,6 +5,7 @@ import { Virtualizer } from 'virtua';
 import { cx } from 'yummies/css';
 import type { DevtoolsClientVM } from '@/model';
 import css from '@/styles.module.css';
+import { ExtrasItemRender } from './extras-item-render';
 import { VmTreeItemRender } from './vm-tree-item-render';
 
 export const VmDevtoolsContent = observer(
@@ -45,6 +46,14 @@ export const VmDevtoolsContent = observer(
                 key={vmItem.key}
               />
             ))}
+            {!!model.devtools.extras && (
+              <ExtrasItemRender
+                payload={{
+                  extras: model.devtools.extras,
+                  devtools: model.devtools,
+                }}
+              />
+            )}
           </Virtualizer>
         </div>
       </div>

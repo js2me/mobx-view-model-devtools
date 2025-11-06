@@ -1,9 +1,9 @@
 {
   "name": "mobx-view-model-devtools",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "",
   "scripts": {
-    "build:watch": "nodemon --watch src --delay 600ms --ext ts,tsx --exec \"pnpm build && pnpm exec http-server dist -p 15000\"",
+    "build:watch": "nodemon --watch src --delay 600ms --ext ts,tsx,css --exec \"pnpm build && pnpm exec http-server dist -p 15000\"",
     "build": "cross-env NODE_ENV=development tsx scripts/build",
     "build:prod": "tsc --noEmit && cross-env NODE_ENV=production tsx scripts/build",
     "lint": "biome check",

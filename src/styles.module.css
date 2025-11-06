@@ -50,6 +50,10 @@
   &.opened {
     @apply pointer-events-none;
   }
+
+  &:not(.isConnected) {
+    @apply grayscale;
+  }
 }
 
 
@@ -82,7 +86,7 @@
 
 .vmContent {
   color: rgb(204, 204, 204);
-  @apply font-mono bg-[#1e1e1e] overflow-auto;
+  @apply font-mono bg-[#1e1e1e] overflow-auto flex flex-col;
 
   > header {
     @apply flex justify-between h-8 items-center pl-2 font-semibold;
@@ -94,17 +98,11 @@
 }
 
 .vmContentTree {
-  @apply flex flex-col px-2 py-2;
+  @apply flex flex-col px-2 py-2 overflow-auto;
 }
 
 .vmTreeItem {
   @apply flex flex-col;
-
-  &.line {
-    position: sticky;
-    top: calc(22px + 22px * var(--level, 0));
-    background: #1e1e1e;
-  }
 
   > header {
     @apply flex items-center gap-1 my-auto cursor-pointer bg-[#1e1e1e] z-1 truncate;
@@ -120,15 +118,20 @@
       @apply text-[14px] truncate;
     }
   }
-}
 
-.vmTreeItem {
+  &.extrasItem {
+    > header > label {
+      background: #6b6902;
+    }
+  }
+
   &:not([data-fitted='true']) {
     > header {
       opacity: 0.6;
     }
   }
 }
+
 
 .vmContentFilters {
   padding: 0 8px;
@@ -177,11 +180,6 @@
   z-index: calc((var(--level, 0) + 1) * 10000 + (var(--order, 0)));
 
   padding-left: calc(10px + (var(--level) * 14px));
-
-  &:has(>.expandButton.expanded) {
-    position: sticky;
-    top: calc(22px + 22px * (var(--level, 0) + 1));
-  }
 }
 
 .property {

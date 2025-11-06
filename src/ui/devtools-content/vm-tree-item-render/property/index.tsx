@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react-lite';
 import { typeGuard } from 'yummies/type-guard';
-import type { VmTreeItem } from '@/model';
 import { ArrayProperty } from './array';
 import { FunctionProperty } from './function';
 import { InstanceProperty } from './instance';
@@ -8,7 +7,7 @@ import { ObjectProperty } from './object';
 import { PrimitiveProperty } from './primitive';
 
 export interface PropertyProps {
-  vmItem: VmTreeItem;
+  model: { isPathExpanded: (path: string) => boolean; handleExpandPropertyClick: (path: string) => void };
   name: string;
   value: any;
   level: number;

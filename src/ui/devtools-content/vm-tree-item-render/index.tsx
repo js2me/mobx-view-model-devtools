@@ -23,6 +23,7 @@ export const VmTreeItemRender = withViewModel(
         >
           <header onClick={() => model.handleVmItemHeaderClick(vmItem)}>
             <ExpandButton
+              showIconAnyway
               expandable={vmItem.children.length > 0}
               expanded={isExpanded}
               disabled={model.devtools.isAllVmsExpandedByDefault}
@@ -33,7 +34,7 @@ export const VmTreeItemRender = withViewModel(
         </div>
         {vmItem.properties.map((property, order) => (
           <Property
-            vmItem={vmItem}
+            model={model}
             name={property}
             order={order}
             value={(vmItem.vm as any)[property]}

@@ -13,7 +13,7 @@ export type VmTreeItem = {
   properties: string[];
 };
 
-export interface VMFittedInfo {
+export interface FittedInfo {
   isFitted: boolean;
   isFittedById?: boolean;
   isFittedByName?: boolean;

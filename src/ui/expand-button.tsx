@@ -7,11 +7,13 @@ export const ExpandButton = ({
   expanded,
   onClick,
   disabled,
+  showIconAnyway,
 }: {
   expandable?: boolean;
   expanded?: boolean;
   onClick?: VoidFunction;
   disabled?: boolean;
+  showIconAnyway?: boolean;
 }) => {
   return (
     <span
@@ -22,7 +24,7 @@ export const ExpandButton = ({
         [css.disabled]: disabled,
       })}
     >
-      {expandable && <ChevronRight />}
+      {(expandable || showIconAnyway) && <ChevronRight />}
     </span>
   );
 };

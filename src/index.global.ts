@@ -6,13 +6,15 @@ Object.assign(globalThis, {
   ViewModelDevtools,
 });
 
+ViewModelDevtools.define({
+  position: 'top-right',
+  defaultIsOpened: false,
+});
+
 viewModelsConfig.hooks.storeCreate.sub((store) => {
   if (ViewModelStoreImpl === store.constructor) {
     return;
   }
-  ViewModelDevtools.connect({
-    position: 'top-right',
-    viewModels: store as any,
-    defaultIsOpened: false,
-  });
+
+  ViewModelDevtools.connect(store as any);
 });

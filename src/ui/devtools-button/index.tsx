@@ -13,6 +13,7 @@ export const VmDevtoolsButton = observer(() => {
         css.vmButton,
         {
           [css.opened]: model.devtools.isPopupOpened,
+          [css.isConnected]: model.devtools.isActive,
         },
         model.devtools.config.buttonClassName,
       )}

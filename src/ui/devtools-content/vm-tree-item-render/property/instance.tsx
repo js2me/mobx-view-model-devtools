@@ -1,16 +1,13 @@
 import { observer } from 'mobx-react-lite';
-import { useViewModel } from 'mobx-view-model';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import { getAllKeys } from '@/model/utils/get-all-keys';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
-import type { VmTreeItemRenderVM } from '../../../../model/vm-tree-item-render.vm';
 import { Property, type PropertyDetailedProps } from '.';
 
 export const InstanceProperty = observer((props: PropertyDetailedProps) => {
-  const { name, value } = props;
-  const model = useViewModel<VmTreeItemRenderVM>();
+  const { name, value, model } = props;
   const isExpanded = model.isPathExpanded(props.path);
 
   const Constructor = value.constructor as Function;
