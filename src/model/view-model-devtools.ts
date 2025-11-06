@@ -285,7 +285,9 @@ export class ViewModelDevtools {
   }
 
   checkIsExtraPathExpanded(path: string) {
-    return this.expandedVmItemsPaths.has(path);
+    const expandedKey = `__EXTRA__%%%${path}`;
+
+    return this.expandedVmItemsPaths.has(expandedKey);
   }
 
   handleExpandVmPropertyClick(vmItem: VmTreeItem, path: string) {

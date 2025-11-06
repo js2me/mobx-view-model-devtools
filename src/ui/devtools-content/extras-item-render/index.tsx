@@ -40,7 +40,7 @@ export const ExtrasItemRender = withViewModel(
             value={extras[property]}
             key={property}
             isFitted={model.devtools.checkIsExtrasPropertyFitted(property)}
-            level={depth}
+            level={depth + 1}
             path={property}
           />
         ))}
