@@ -1,9 +1,11 @@
+import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import { camelCase, upperFirst } from 'lodash-es';
 import { rollup } from 'rollup';
 import dts from 'rollup-plugin-dts';
 import { ConfigsManager, prepareDistDir } from 'sborshik/utils';
+import { minify } from 'terser';
 import { build, defineConfig, type LibraryFormats } from 'vite';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
@@ -31,10 +33,16 @@ const createBundle = async ({
     sourceEntryFilePath = resolve(configs.rootPath, 'src/index.global.ts');
   }
 
+  const outputFileNames: string[] = [];
+
+  const mode =
+    process.env.NODE_ENV === 'development' ? 'development' : 'production';
+
   const viteConfig = defineConfig({
     appType: 'spa',
+    mode: mode,
     define: {
-      'process.env.NODE_ENV': '"production"',
+      'process.env.NODE_ENV': `"${mode}"`,
       buildEnvs: JSON.stringify(buildEnvs),
     },
     build: {
@@ -52,7 +60,10 @@ const createBundle = async ({
             ? upperFirst(camelCase(configs.package.name))
             : undefined,
         fileName: (format, entryName) => {
-          return format === 'cjs' ? `${entryName}.cjs` : `${entryName}.js`;
+          const outputFileName =
+            format === 'cjs' ? `${entryName}.cjs` : `${entryName}.js`;
+          outputFileNames.push(outputFileName);
+          return outputFileName;
         },
       },
       rollupOptions: {
@@ -71,7 +82,6 @@ const createBundle = async ({
       },
       postcss: './postcss.config.js',
     },
-    mode: 'production',
     resolve: {
       alias: [
         {
@@ -87,9 +97,12 @@ const createBundle = async ({
         name: 'dts-bundle',
         apply: 'build',
         async closeBundle() {
-          console.log('\n📦 Generating bundled .d.ts files...\n');
+          if (buildEnvs.version === 'global') {
+            console.log('⚠️ Generating bundled .d.ts files SKIPPED...\n');
+            return;
+          }
 
-          const name = 'index';
+          console.log('\n📦 Generating bundled .d.ts files...\n');
 
           try {
             const bundle = await rollup({
@@ -111,14 +124,14 @@ const createBundle = async ({
             });
 
             await bundle.write({
-              file: `dist/${name}.d.ts`,
+              file: `dist/${fileName}.d.ts`,
               format: 'es',
             });
 
             await bundle.close();
-            console.log(`✅ ${name}.d.ts`);
+            console.log(`✅ ${fileName}.d.ts`);
           } catch (error) {
-            console.error(`❌ Failed to generate ${name}.d.ts:`, error);
+            console.error(`❌ Failed to generate ${fileName}.d.ts:`, error);
           }
         },
       },
@@ -126,6 +139,29 @@ const createBundle = async ({
   });
 
   await build(viteConfig);
+
+  if (mode === 'production') {
+    for await (const outputFileName of outputFileNames) {
+      const outputFilePath = resolve(
+        configs.rootPath,
+        `dist/${outputFileName}`,
+      );
+      const outputFileContent = readFileSync(outputFilePath).toString();
+
+      writeFileSync(
+        outputFilePath,
+        (
+          await minify(outputFileContent, {
+            mangle: true,
+            compress: true,
+            format: {
+              comments: false,
+            },
+          })
+        ).code,
+      );
+    }
+  }
 };
 
 const main = async () => {

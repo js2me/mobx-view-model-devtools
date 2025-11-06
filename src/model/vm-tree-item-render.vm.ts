@@ -1,36 +1,22 @@
 import { action, makeObservable } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
-import {
-  DevtoolsVMImpl,
-  type ViewModelDevtools,
-  type VmTreeItem,
-} from '@/model';
+import { ViewModelImpl } from './lib/view-model.impl';
+import type { VmTreeItem } from './types';
+import type { ViewModelDevtools } from './view-model-devtools';
 
 type VmTreeItemRenderPayload = {
   vmItem: VmTreeItem;
   devtools: ViewModelDevtools;
 };
 
-export class VmTreeItemRenderVM extends DevtoolsVMImpl<
+export class VmTreeItemRenderVM extends ViewModelImpl<
   VmTreeItemRenderPayload,
   VmTreeItemRenderVM
 > {
   devtools = this.payload.devtools;
 
   constructor(vmParams: ViewModelParams<any, any>) {
-    super({
-      ...vmParams,
-      vmConfig: {
-        observable: {
-          viewModels: {
-            useDecorators: false,
-          },
-          viewModelStores: {
-            useDecorators: false,
-          },
-        },
-      },
-    });
+    super(vmParams);
 
     makeObservable<typeof this>(this, {
       handleExpandPropertyClick: action,

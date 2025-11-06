@@ -5,9 +5,9 @@ import {
   type ObservableSet,
   observable,
 } from 'mobx';
-import {
-  type AnyViewModel,
-  type ViewModelParams,
+import type {
+  AnyViewModel,
+  ViewModelParams,
   ViewModelStoreBase,
 } from 'mobx-view-model';
 import { type ChangeEventHandler, createElement } from 'react';
@@ -16,7 +16,8 @@ import { createRef, type Ref } from 'yummies/mobx';
 import type { AnyObject, Maybe } from 'yummies/types';
 import { DevtoolsClient } from '@/ui/devtools-client';
 import { KeyboardHandler } from './keyboard-handler';
-import { DevtoolsVMImpl } from './lib/devtools-vm.impl';
+import { ViewModelImpl } from './lib/view-model.impl';
+import { ViewModelStoreImpl } from './lib/view-model-store.impl';
 import type { AnyVM, VMFittedInfo, VmTreeItem } from './types';
 import { checkPath } from './utils/check-path';
 import {
@@ -35,7 +36,7 @@ export interface ViewModelDevtoolsConfig {
 }
 
 export class ViewModelDevtools {
-  isOpened: boolean;
+  isPopupOpened: boolean;
   displayType: string;
   vmStore: ViewModelStoreBase;
   projectVmStore: ViewModelStoreBase<AnyViewModel>;
@@ -56,7 +57,7 @@ export class ViewModelDevtools {
 
   get allVms() {
     return [...this.vmMap.values()].filter(
-      (vm) => !DevtoolsVMImpl.isPrototypeOf(vm.constructor),
+      (vm) => !ViewModelImpl.isPrototypeOf(vm.constructor),
     );
   }
 
@@ -129,7 +130,6 @@ export class ViewModelDevtools {
     return !!this.search.toLowerCase().trim();
   }
 
-  @computed
   private get searchCache() {
     this.formattedSearch;
     return new Map<string, VMFittedInfo>();
@@ -293,10 +293,6 @@ export class ViewModelDevtools {
     this.search = e.target.value;
   };
 
-  handleToggleOpen = () => {
-    this.isOpened = !this.isOpened;
-  };
-
   private getVmParams(vm: AnyVM): null | ViewModelParams {
     if ('vmParams' in vm) {
       return vm.vmParams as ViewModelParams;
@@ -313,10 +309,10 @@ export class ViewModelDevtools {
   }
 
   constructor(public config: ViewModelDevtoolsConfig) {
-    this.isOpened = !!this.config.defaultIsOpened;
+    this.isPopupOpened = !!this.config.defaultIsOpened;
     this.search = '';
     this.displayType = 'popup';
-    this.vmStore = new ViewModelStoreBase();
+    this.vmStore = new ViewModelStoreImpl();
     this.projectVmStore = this.config.viewModels;
     this.expandedVmsSet = observable.set();
     this.isAllVmsExpandedByDefault = true;
@@ -327,11 +323,10 @@ export class ViewModelDevtools {
     this.buttonRef = createRef<HTMLButtonElement>();
     this.keyboardHandler = new KeyboardHandler(this);
 
-    makeObservable<typeof this, 'vmMap'>(this, {
-      isOpened: observable.ref,
+    makeObservable<typeof this, 'vmMap' | 'searchCache'>(this, {
+      isPopupOpened: observable.ref,
       isAllVmsExpandedByDefault: observable,
       search: observable.ref,
-      handleToggleOpen: action,
       handleExpandPropertyClick: action,
       allVms: computed.struct,
       vmMap: computed.struct,
@@ -339,6 +334,7 @@ export class ViewModelDevtools {
       vmTree: computed.struct,
       rootVms: computed.struct,
       handleSearchChange: action,
+      searchCache: computed,
     });
 
     this.render();

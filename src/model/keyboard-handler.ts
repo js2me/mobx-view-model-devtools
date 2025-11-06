@@ -9,9 +9,15 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
     super({
       actions: [
         {
-          shortcuts: ['Ctrl+Shift+F12'],
+          shortcuts: ['Ctrl+F12'],
           action: () => {
-            devtools.handleToggleOpen();
+            devtools.isPopupOpened = !devtools.isPopupOpened;
+          },
+        },
+        {
+          shortcuts: ['Escape'],
+          action: () => {
+            devtools.isPopupOpened = false;
           },
         },
         {

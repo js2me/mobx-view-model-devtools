@@ -12,13 +12,13 @@ export const VmDevtoolsButton = observer(() => {
       className={cx(
         css.vmButton,
         {
-          [css.opened]: model.devtools.isOpened,
+          [css.opened]: model.devtools.isPopupOpened,
         },
         model.devtools.config.buttonClassName,
       )}
       data-position={`${model.devtools.config.position}`}
       ref={model.devtools.buttonRef}
-      onClick={model.devtools.handleToggleOpen}
+      onClick={model.handleToggleOpen}
     >
       <img src={model.devtools.logoUrl} />
       <div />
