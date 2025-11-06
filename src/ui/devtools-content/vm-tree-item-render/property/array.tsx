@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
-import { ExpandButton } from '@/ui/expand-button';
 import { Property, type PropertyDetailedProps } from '.';
 
 export const ArrayProperty = observer((props: PropertyDetailedProps) => {
@@ -15,22 +14,23 @@ export const ArrayProperty = observer((props: PropertyDetailedProps) => {
   return (
     <>
       <div
-        className={cx(css.line, css.property, css.array)}
+        className={cx(css.line, css.property, css.array, {
+          [css.expandable]: isExpandable,
+        })}
         style={
           { '--level': props.level, '--order': props.order } as CSSProperties
         }
         onClick={() => model.handleExpandPropertyClick(props.path)}
         data-fitted={props.isFitted}
       >
-        <ExpandButton expandable={value.length > 0} expanded={isExpanded} />
         <span className={css.propertyName}>{property}</span>
         <span className={css.propertyMeta}>:&nbsp;</span>
         <span className={css.propertyValue}>
-          {isExpandable ? '[...]' : `[]`}
+          {isExpanded ? '[' : isExpandable ? '[...]' : `[]`}
         </span>
       </div>
       {isExpanded && (
-        <div className={css.propertyExpandedContent}>
+        <>
           {keys.map((key, order) => (
             <Property
               {...props}
@@ -42,7 +42,18 @@ export const ArrayProperty = observer((props: PropertyDetailedProps) => {
               level={props.level + 1}
             />
           ))}
-        </div>
+          <div
+            className={cx(css.line, css.property)}
+            style={
+              {
+                '--level': props.level,
+                '--order': keys.length,
+              } as CSSProperties
+            }
+          >
+            <span className={css.propertyMeta}>{`]`}</span>
+          </div>
+        </>
       )}
     </>
   );

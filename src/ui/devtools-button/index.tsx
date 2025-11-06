@@ -18,7 +18,6 @@ export const VmDevtoolsButton = observer(() => {
         model.devtools.config.buttonClassName,
       )}
       data-position={`${model.devtools.config.position}`}
-      ref={model.devtools.buttonRef}
       onClick={model.handleToggleOpen}
     >
       <img src={model.devtools.logoUrl} />

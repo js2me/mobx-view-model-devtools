@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
-import { ExpandButton } from '@/ui/expand-button';
 import type { PropertyDetailedProps } from '.';
 
 export const PrimitiveProperty = observer((props: PropertyDetailedProps) => {
@@ -18,7 +17,6 @@ export const PrimitiveProperty = observer((props: PropertyDetailedProps) => {
       data-fitted={props.isFitted}
       title={String(value)}
     >
-      <ExpandButton />
       <span className={css.propertyName}>{name}</span>
       <span className={css.propertyMeta}>:&nbsp;</span>
       <span className={css.propertyValue}>

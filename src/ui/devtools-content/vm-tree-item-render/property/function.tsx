@@ -2,11 +2,10 @@ import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
-import { ExpandButton } from '@/ui/expand-button';
 import type { PropertyDetailedProps } from '.';
 
 export const FunctionProperty = observer((props: PropertyDetailedProps) => {
-  const { name: property, value, valueType } = props;
+  const { name: property, value } = props;
 
   const argLabels = Array.from(
     { length: value.length },
@@ -22,10 +21,6 @@ export const FunctionProperty = observer((props: PropertyDetailedProps) => {
       }
       data-fitted={props.isFitted}
     >
-      <ExpandButton />
-      {valueType.includes('Async') && (
-        <span className={cx(css.propertyMeta, css.small)}>async&nbsp;</span>
-      )}
       <span className={css.propertyName}>{property}</span>
       <span className={css.propertyMeta}>{`(${argLabels.join(', ')})`}</span>
     </div>

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+.rootContainer * {
+  font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+
 .vmButton {
   @apply fixed z-99 size-9 cursor-pointer rounded-lg font-mono transition-all;
 
@@ -99,10 +103,19 @@
 
 .vmContentTree {
   @apply flex flex-col px-2 py-2 overflow-auto;
+  scrollbar-width: thin;
+  scrollbar-color: #81818170 #1e1e1e;
+
+  &:hover {
+    scrollbar-color: #818181 #1e1e1e;
+  }
 }
 
-.vmTreeItem {
-  @apply flex flex-col;
+.line.vmTreeItem {
+  padding-left: calc(0px + (var(--level) * 20px));
+  position: sticky;
+  top: -8px;
+  z-index: 1;
 
   > header {
     @apply flex items-center gap-1 my-auto cursor-pointer bg-[#1e1e1e] z-1 truncate;
@@ -135,9 +148,6 @@
 
 .vmContentFilters {
   padding: 0 8px;
-  position: sticky;
-  top: 0;
-  z-index: 99;
   width: 100%;
   background: #1e1e1e;
 
@@ -177,9 +187,11 @@
   flex-direction: row;
   align-items: center;
   position: relative;
-  z-index: calc((var(--level, 0) + 1) * 10000 + (var(--order, 0)));
+  padding-left: calc(28px + (var(--level) * 15px));
 
-  padding-left: calc(10px + (var(--level) * 14px));
+  &.expandable {
+    cursor: pointer;
+  }
 }
 
 .property {

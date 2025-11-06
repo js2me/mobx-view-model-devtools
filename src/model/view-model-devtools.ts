@@ -12,9 +12,11 @@ import type {
 } from 'mobx-view-model';
 import { type ChangeEventHandler, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import type { VListHandle } from 'virtua';
 import { createRef, type Ref } from 'yummies/mobx';
 import type { AnyObject, Maybe } from 'yummies/types';
 import { DevtoolsClient } from '@/ui/devtools-client';
+import css from '../styles.module.css';
 import { KeyboardHandler } from './keyboard-handler';
 import { ViewModelImpl } from './lib/view-model.impl';
 import { ViewModelStoreImpl } from './lib/view-model-store.impl';
@@ -45,12 +47,12 @@ export class ViewModelDevtools {
   expandedVmItemsPaths: ObservableSet<string>;
   logoUrl: string;
   inputRef: FocusableRef<HTMLInputElement>;
-  containerRef: FocusableRef<HTMLDivElement>;
-  buttonRef: Ref<HTMLButtonElement>;
+  scrollContentRef: Ref<HTMLDivElement>;
   keyboardHandler: KeyboardHandler;
   search: string;
 
   private expandedVmsSet: ObservableSet<string>;
+  scrollListRef: Ref<VListHandle>;
 
   get allVms() {
     const vmStore = this.projectVmStore as Maybe<ViewModelStoreBase>;
@@ -342,8 +344,8 @@ export class ViewModelDevtools {
     this.expandedVmItemsPaths = observable.set<string>();
     this.logoUrl = 'https://js2me.github.io/mobx-view-model/logo.png';
     this.inputRef = createFocusableRef<HTMLInputElement>();
-    this.containerRef = createFocusableRef<HTMLDivElement>();
-    this.buttonRef = createRef<HTMLButtonElement>();
+    this.scrollContentRef = createRef<HTMLDivElement>();
+    this.scrollListRef = createRef<VListHandle>();
     this.keyboardHandler = new KeyboardHandler(this);
 
     makeObservable<typeof this, 'searchCache'>(this, {
@@ -379,25 +381,26 @@ export class ViewModelDevtools {
   render() {
     const containerId = this.config.containerId ?? 'view-model-devtools';
 
-    let existedContainer = document.querySelector(
+    let container = document.querySelector(
       `#${containerId}`,
     ) as Maybe<HTMLDivElement>;
 
-    if (!existedContainer) {
-      existedContainer = document.createElement('div');
-      existedContainer.style = 'display: contents;';
-      existedContainer.id = containerId;
+    if (!container) {
+      container = document.createElement('div');
+      container.style = 'display: contents;';
+      container.className = css.rootContainer;
+      container.id = containerId;
 
       if (document.body) {
-        document.body.appendChild(existedContainer);
+        document.body.appendChild(container);
       } else {
         document.addEventListener('DOMContentLoaded', () => {
-          document.body.appendChild(existedContainer!);
+          document.body.appendChild(container!);
         });
       }
     }
 
-    const root = createRoot(existedContainer);
+    const root = createRoot(container);
     root.render(createElement(DevtoolsClient, { payload: { devtools: this } }));
   }
 

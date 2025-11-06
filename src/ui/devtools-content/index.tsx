@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
-import { Virtualizer } from 'virtua';
+import { VList } from 'virtua';
 import { cx } from 'yummies/css';
 import type { DevtoolsClientVM } from '@/model';
 import css from '@/styles.module.css';
@@ -23,7 +23,6 @@ export const VmDevtoolsContent = observer(
       <div
         {...props}
         className={cx(css.vmContent, className)}
-        ref={model.devtools.containerRef}
       >
         <header>
           <span>mobx-view-model devtools</span>
@@ -38,24 +37,22 @@ export const VmDevtoolsContent = observer(
             onChange={model.devtools.handleSearchChange}
           />
         </div>
-        <div className={css.vmContentTree}>
-          <Virtualizer>
-            {model.devtools.vmTree.map((vmItem) => (
-              <VmTreeItemRender
-                payload={{ vmItem, devtools: model.devtools }}
-                key={vmItem.key}
-              />
-            ))}
-            {!!model.devtools.extras && (
-              <ExtrasItemRender
-                payload={{
-                  extras: model.devtools.extras,
-                  devtools: model.devtools,
-                }}
-              />
-            )}
-          </Virtualizer>
-        </div>
+        <VList className={css.vmContentTree} ref={model.devtools.scrollListRef}>
+          {model.devtools.vmTree.map((vmItem) => (
+            <VmTreeItemRender
+              payload={{ vmItem, devtools: model.devtools }}
+              key={vmItem.key}
+            />
+          ))}
+          {!!model.devtools.extras && (
+            <ExtrasItemRender
+              payload={{
+                extras: model.devtools.extras,
+                devtools: model.devtools,
+              }}
+            />
+          )}
+        </VList>
       </div>
     );
   },

@@ -35,17 +35,21 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
         {
           shortcuts: ['Ctrl+ArrowDown'],
           action: () => {
-            requestAnimationFrame(() => {
-              devtools.containerRef.current!.scrollTop += 200;
-            });
+            if (!devtools.scrollListRef.current) return;
+
+            devtools.scrollListRef.current.scrollTo(
+              devtools.scrollListRef.current.scrollOffset + 400,
+            );
           },
         },
         {
           shortcuts: ['Ctrl+ArrowUp'],
           action: () => {
-            requestAnimationFrame(() => {
-              devtools.containerRef.current!.scrollTop -= 200;
-            });
+            if (!devtools.scrollListRef.current) return;
+
+            devtools.scrollListRef.current.scrollTo(
+              devtools.scrollListRef.current.scrollOffset - 400,
+            );
           },
         },
       ],
