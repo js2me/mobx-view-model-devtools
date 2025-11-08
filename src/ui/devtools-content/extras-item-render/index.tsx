@@ -21,6 +21,7 @@ export const ExtrasItemRender = withViewModel(
         <div
           className={cx(css.line, css.vmTreeItem, css.extrasItem)}
           data-fitted={'true'}
+          data-depth={String().padEnd(depth, '-')}
           style={{ '--level': depth } as CSSProperties}
         >
           <header>
@@ -39,7 +40,10 @@ export const ExtrasItemRender = withViewModel(
             order={order}
             value={extras[property]}
             key={property}
-            isFitted={model.devtools.checkIsExtrasPropertyFitted(property)}
+            isFitted={model.devtools.searchEngine.getSearchPropertyResult(
+              { type: 'extras', item: extras },
+              property,
+            )}
             level={depth + 1}
             path={property}
           />

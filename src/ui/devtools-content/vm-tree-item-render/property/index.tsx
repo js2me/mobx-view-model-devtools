@@ -8,12 +8,13 @@ import { PrimitiveProperty } from './primitive';
 
 export interface PropertyProps {
   model: { isPathExpanded: (path: string) => boolean; handleExpandPropertyClick: (path: string) => void };
-  name: string;
+  name?: string;
   value: any;
   level: number;
   isFitted: boolean;
   path: string;
   order?: number;
+  extraRight?: React.ReactNode;
 }
 
 export interface PropertyDetailedProps extends PropertyProps {

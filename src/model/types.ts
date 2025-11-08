@@ -11,6 +11,10 @@ export type VmTreeItem = {
   depth: number;
   key: string;
   properties: string[];
+  searchData: {
+    name: string;
+    id: string;
+  };
 };
 
 export interface FittedInfo {

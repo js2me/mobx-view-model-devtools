@@ -2,6 +2,7 @@
 
 .rootContainer * {
   font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size: 14px;
 }
 
 .vmButton {
@@ -97,6 +98,48 @@
   }
 }
 
+.vmContentInput {
+  display: flex;
+  position: relative;
+}
+
+.vmContentInput > svg {
+  position: absolute;
+  width: 16px;
+  inset: 50% 0;
+  transform: translate(6px, -50%);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.vmContentInput > input  {
+  background: #343434;
+  border-radius: 4px;
+  outline: 0;
+  width: 100%;
+  padding: 3px 26px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+
+.vmContentInput > button {
+  position: absolute;
+  right: 6px;
+  width: 16px;
+  transform: translate(4px, -50%);
+  top: 50%;
+  opacity: 0.6;
+  display: none;
+}
+
+.vmContentInput.filled > svg {
+  opacity: 0.9;
+}
+
+.vmContentInput.filled > button {
+  display: block;
+}
+
 .vmContentTree {
   @apply flex flex-col px-2 py-2 overflow-auto;
   scrollbar-width: thin;
@@ -146,15 +189,6 @@
   padding: 0 8px;
   width: 100%;
   background: #1e1e1e;
-
-  input {
-    background: #343434;
-    outline: 0;
-    border-radius: 4px;
-    padding: 3px 4px;
-    font-size: 14px;
-    width: 100%;
-  }
 }
 
 .propertyMeta {

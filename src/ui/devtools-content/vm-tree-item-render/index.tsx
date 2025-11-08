@@ -12,13 +12,19 @@ export const VmTreeItemRender = withViewModel(
     const vmItem = model.payload.vmItem;
     const isExpanded = model.devtools.isExpanded(vmItem);
 
-    const fittedInfo = model.devtools.getVMFittedInfo(vmItem);
+    const itemSearchResult = model.devtools.searchEngine.getSearchResult({
+      type: 'vm',
+      item: vmItem,
+    });
 
     return (
       <>
         <div
           className={cx(css.line, css.vmTreeItem)}
-          data-fitted={fittedInfo.isFittedByName || fittedInfo.isFittedById}
+          data-fitted={
+            itemSearchResult.isFittedByName || itemSearchResult.isFittedById
+          }
+          data-depth={String().padEnd(vmItem.depth, '-')}
           style={{ '--level': vmItem.depth } as CSSProperties}
         >
           <header onClick={() => model.handleVmItemHeaderClick(vmItem)}>
@@ -32,14 +38,22 @@ export const VmTreeItemRender = withViewModel(
             <span title={vmItem.vm.id}>{vmItem.vm.id}</span>
           </header>
         </div>
-        {vmItem.properties.map((property, order) => (
+        {vmItem.properties.map((property, order, arr) => (
           <Property
             model={model}
             name={property}
             order={order}
             value={(vmItem.vm as any)[property]}
             key={property}
-            isFitted={model.devtools.checkIsPropertyFitted(vmItem, property)}
+            isFitted={model.devtools.searchEngine.getSearchPropertyResult(
+              { type: 'vm', item: vmItem },
+              property,
+            )}
+            extraRight={
+              order !== arr.length - 1 && (
+                <span className={css.propertyMeta}>{`,`}</span>
+              )
+            }
             level={vmItem.depth}
             path={property}
           />

@@ -27,10 +27,10 @@ const createBundle = async ({
     libraryFormats = ['cjs', 'es'];
     sourceEntryFilePath = resolve(configs.rootPath, 'src/index.ts');
   } else {
-    fileName = 'index.global';
+    fileName = 'auto.global';
     emptyOutDir = false;
     libraryFormats = ['es'];
-    sourceEntryFilePath = resolve(configs.rootPath, 'src/index.global.ts');
+    sourceEntryFilePath = resolve(configs.rootPath, 'src/auto.global.ts');
   }
 
   const outputFileNames: string[] = [];
@@ -182,7 +182,7 @@ const main = async () => {
 
   await prepareDistDir({
     configs,
-    ignoredModuleNamesForExport: ['index.global'],
+    ignoredModuleNamesForExport: ['auto.global'],
   });
 };
 

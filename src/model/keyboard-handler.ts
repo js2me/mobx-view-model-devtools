@@ -33,6 +33,14 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
           },
         },
         {
+          shortcuts: ['Tab'],
+          action: (e) => {
+            if (devtools.searchEngine.searchInputRef.meta.focused) {
+              e.preventDefault();
+            }
+          },
+        },
+        {
           shortcuts: ['Ctrl+ArrowDown'],
           action: () => {
             if (!devtools.scrollListRef.current) return;

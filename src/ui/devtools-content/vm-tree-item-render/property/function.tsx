@@ -5,7 +5,7 @@ import css from '@/styles.module.css';
 import type { PropertyDetailedProps } from '.';
 
 export const FunctionProperty = observer((props: PropertyDetailedProps) => {
-  const { name: property, value } = props;
+  const { name: property, value, extraRight } = props;
 
   const argLabels = Array.from(
     { length: value.length },
@@ -20,9 +20,11 @@ export const FunctionProperty = observer((props: PropertyDetailedProps) => {
         { '--level': props.level, '--order': props.order } as CSSProperties
       }
       data-fitted={props.isFitted}
+      data-depth={String().padEnd(props.level, '-')}
     >
       <span className={css.propertyName}>{property}</span>
       <span className={css.propertyMeta}>{`(${argLabels.join(', ')})`}</span>
+      {extraRight}
     </div>
   );
 });

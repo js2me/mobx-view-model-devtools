@@ -5,7 +5,7 @@ import css from '@/styles.module.css';
 import type { PropertyDetailedProps } from '.';
 
 export const PrimitiveProperty = observer((props: PropertyDetailedProps) => {
-  const { name, value } = props;
+  const { name, value, extraRight } = props;
   const primitiveType = typeof value;
 
   return (
@@ -16,16 +16,22 @@ export const PrimitiveProperty = observer((props: PropertyDetailedProps) => {
       }
       data-fitted={props.isFitted}
       title={String(value)}
+      data-depth={String().padEnd(props.level, '-')}
     >
-      <span className={css.propertyName}>{name}</span>
-      <span className={css.propertyMeta}>:&nbsp;</span>
+      {name === undefined ? null : (
+        <>
+          <span className={css.propertyName}>{name}</span>
+          <span className={css.propertyMeta}>:&nbsp;</span>
+        </>
+      )}
       <span className={css.propertyValue}>
         {primitiveType === 'symbol'
-          ? 'Symbol'
+          ? `Symbol(${Symbol.keyFor(value) || ''})`
           : primitiveType === 'string'
             ? `"${value}"`
             : `${value}`}
       </span>
+      {extraRight}
     </div>
   );
 });

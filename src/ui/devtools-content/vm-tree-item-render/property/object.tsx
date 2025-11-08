@@ -6,7 +6,7 @@ import css from '@/styles.module.css';
 import { Property, type PropertyDetailedProps } from '.';
 
 export const ObjectProperty = observer((props: PropertyDetailedProps) => {
-  const { name: property, value, model } = props;
+  const { name, value, model, extraRight } = props;
   const isExpanded = model.isPathExpanded(props.path);
 
   const keys = getAllKeys(value);
@@ -17,22 +17,29 @@ export const ObjectProperty = observer((props: PropertyDetailedProps) => {
       <div
         className={cx(css.line, css.property, css.object, {
           [css.expandable]: isExpandable,
+          [css.expanded]: isExpanded,
         })}
         style={
           { '--level': props.level, '--order': props.order } as CSSProperties
         }
         onClick={() => model.handleExpandPropertyClick(props.path)}
         data-fitted={props.isFitted}
+        data-depth={String().padEnd(props.level, '-')}
       >
-        <span className={css.propertyName}>{property}</span>
-        <span className={css.propertyMeta}>:&nbsp;</span>
+        {name === undefined ? null : (
+          <>
+            <span className={css.propertyName}>{name}</span>
+            <span className={css.propertyMeta}>:&nbsp;</span>
+          </>
+        )}
         <span className={css.propertyValue}>
           {isExpanded ? '{' : isExpandable ? '{...}' : `{}`}
         </span>
+        {!isExpanded && extraRight}
       </div>
       {isExpanded && (
         <>
-          {keys.map((key, order) => (
+          {keys.map((key, order, arr) => (
             <Property
               {...props}
               name={key}
@@ -41,6 +48,7 @@ export const ObjectProperty = observer((props: PropertyDetailedProps) => {
               key={key}
               path={`${props.path}.${key}`}
               level={props.level + 1}
+              extraRight={<span className={css.propertyMeta}>{`,`}</span>}
             />
           ))}
           <div
@@ -53,6 +61,7 @@ export const ObjectProperty = observer((props: PropertyDetailedProps) => {
             }
           >
             <span className={css.propertyMeta}>{`}`}</span>
+            {extraRight}
           </div>
         </>
       )}
