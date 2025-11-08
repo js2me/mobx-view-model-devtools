@@ -40,7 +40,7 @@ export const VmDevtoolsContent = observer(
             </button>
           </div>
         </div>
-        <VList className={css.vmContentTree} ref={model.devtools.scrollListRef}>
+        <VList className={css.vmContentTree} ref={model.devtools.scrollListRef} itemSize={22}>
           {model.devtools.vmTree.map((vmItem) => (
             <VmTreeItemRender
               payload={{ vmItem, devtools: model.devtools }}
