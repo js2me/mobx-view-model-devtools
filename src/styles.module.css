@@ -89,6 +89,8 @@
 
 .vmPopup {
   @apply fixed z-99 w-[520px] rounded-lg h-[calc(100vh_-_24px)];
+  width: calc(100vw - 34px);
+  max-width: 520px;
 
   &[data-position="top-right"], &[data-position="undefined"] {
     @apply top-3 right-3;
