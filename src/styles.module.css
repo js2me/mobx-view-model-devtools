@@ -61,16 +61,34 @@
   }
 }
 
+.closePopupButton {
+  width: 28px;
+  padding: 6px;
+}
+
+.baseActions {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  height: 16px;
+  align-items: center;
+  margin-left: 6px;
+  margin-right: auto;
+}
+
+.hierarchyButton {
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+  border-radius: 6px;
+
+  &.active {
+    background: #f0f0f01f;
+  }
+}
 
 .vmPopup {
   @apply fixed z-99 w-[520px] rounded-lg h-[calc(100vh_-_24px)];
-
-  > header {
-    button {
-      width: 28px;
-      padding: 6px;
-    }
-  }
 
   &[data-position="top-right"], &[data-position="undefined"] {
     @apply top-3 right-3;

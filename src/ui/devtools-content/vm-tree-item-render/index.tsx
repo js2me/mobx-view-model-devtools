@@ -17,6 +17,8 @@ export const VmTreeItemRender = withViewModel(
       item: vmItem,
     });
 
+    const depth = model.devtools.isHierarchyMode ? vmItem.depth : 0;
+
     return (
       <>
         <div
@@ -24,8 +26,8 @@ export const VmTreeItemRender = withViewModel(
           data-fitted={
             itemSearchResult.isFittedByName || itemSearchResult.isFittedById
           }
-          data-depth={String().padEnd(vmItem.depth, '-')}
-          style={{ '--level': vmItem.depth } as CSSProperties}
+          data-depth={String().padEnd(depth, '-')}
+          style={{ '--level': depth } as CSSProperties}
         >
           <header onClick={() => model.handleVmItemHeaderClick(vmItem)}>
             <ExpandButton
@@ -54,7 +56,7 @@ export const VmTreeItemRender = withViewModel(
                 <span className={css.propertyMeta}>{`,`}</span>
               )
             }
-            level={vmItem.depth}
+            level={depth}
             path={property}
           />
         ))}

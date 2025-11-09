@@ -18,8 +18,8 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0(mobx@6.15.0)(react@18.3.1)
       mobx-view-model:
-        specifier: ^8.8.0
-        version: 8.8.0(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.8.1
+        version: 8.8.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2880,8 +2880,8 @@ packages:
     peerDependencies:
       mobx: ^6.12.4
 
-  mobx-view-model@8.8.0:
-    resolution: {integrity: sha512-vez5WNpqWLOqfLa4f35uYQHcwZzNX8CwRNqFMezOwqfpMlrd5h2us3fqFYoxms7nBfwU90cszGRib01DJOH4gA==}
+  mobx-view-model@8.8.1:
+    resolution: {integrity: sha512-yn39bJoQJRMIYLfl2Unbgkz4xINPJcTbuRANEkoDWWfcowPgdbtut+UkX2hsnpvXQgRE5BPujxhBsA/RJXmCvg==}
     peerDependencies:
       mobx: ^6.12.4
       mobx-react-lite: ^4.0.7
@@ -6927,7 +6927,7 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  mobx-view-model@8.8.0(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  mobx-view-model@8.8.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       mobx: 6.15.0
       mobx-react-lite: 4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

@@ -41,7 +41,7 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
           },
         },
         {
-          shortcuts: ['Ctrl+ArrowDown'],
+          shortcuts: ['Ctrl+ArrowDown', 'PageDown'],
           action: () => {
             if (!devtools.scrollListRef.current) return;
 
@@ -51,7 +51,7 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
           },
         },
         {
-          shortcuts: ['Ctrl+ArrowUp'],
+          shortcuts: ['Ctrl+ArrowUp', 'PageUp'],
           action: () => {
             if (!devtools.scrollListRef.current) return;
 

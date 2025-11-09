@@ -13,7 +13,7 @@ export const VmDevtoolsPopup = observer(() => {
       className={css.vmPopup}
       data-position={`${model.devtools.config.position}`}
       headerContent={
-        <button onClick={model.handleClosePopupClick}>
+        <button className={css.closePopupButton} onClick={model.handleClosePopupClick}>
           <XMark />
         </button>
       }
