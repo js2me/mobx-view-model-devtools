@@ -1,23 +1,21 @@
 import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
-import { getAllKeys } from '@/model/utils/get-all-keys';
-import css from '@/styles.module.css';
 import { Property, type PropertyDetailedProps } from '.';
+import css from './styles.module.css';
 
-export const InstanceProperty = observer((props: PropertyDetailedProps) => {
-  const { name, value, model, extraRight } = props;
+export const ArrayProperty = observer((props: PropertyDetailedProps) => {
+  const { name: property, value, model, extraRight } = props;
   const isExpanded = model.isPathExpanded(props.path);
 
-  const Constructor = value.constructor as Function;
-  const className = Constructor.name;
-
-  const keys = getAllKeys(value);
+  const keys = Object.keys(value);
+  const isExpandable = keys.length > 0;
 
   return (
     <>
       <div
-        className={cx(css.line, css.property, css.instance, css.expandable, {
+        className={cx(css.property, css.array, {
+          [css.expandable]: isExpandable,
           [css.expanded]: isExpanded,
         })}
         style={
@@ -27,14 +25,15 @@ export const InstanceProperty = observer((props: PropertyDetailedProps) => {
         data-fitted={props.isFitted}
         data-depth={String().padEnd(props.level, '-')}
       >
-        {name === undefined ? null : (
+        {property === undefined ? null : (
           <>
-            <span className={css.propertyName}>{name}</span>
-            <span className={css.propertyMeta}>:&nbsp;</span>
+            <span className={css.propertyName}>{property}</span>
+            :&nbsp;
           </>
         )}
-        <span className={css.propertyValue}>{`${className}`}</span>
-        {isExpanded && <span className={css.propertyMeta}>&nbsp;{`{`}</span>}
+        <span className={css.propertyValue}>
+          {isExpanded ? '[' : isExpandable ? '[...]' : `[]`}
+        </span>
         {!isExpanded && extraRight}
       </div>
       {isExpanded && (
@@ -48,11 +47,11 @@ export const InstanceProperty = observer((props: PropertyDetailedProps) => {
               key={key}
               path={`${props.path}.${key}`}
               level={props.level + 1}
-              extraRight={<span className={css.propertyMeta}>{`,`}</span>}
+              extraRight={','}
             />
           ))}
           <div
-            className={cx(css.line, css.property, css.instance)}
+            className={css.property}
             style={
               {
                 '--level': props.level,
@@ -60,7 +59,7 @@ export const InstanceProperty = observer((props: PropertyDetailedProps) => {
               } as CSSProperties
             }
           >
-            <span className={css.propertyMeta}>{`}`}</span>
+            {`]`}
             {extraRight}
           </div>
         </>

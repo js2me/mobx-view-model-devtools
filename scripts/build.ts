@@ -1,6 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import tailwindcss from '@tailwindcss/vite';
 import { camelCase, upperFirst } from 'lodash-es';
 import { rollup } from 'rollup';
 import dts from 'rollup-plugin-dts';
@@ -91,7 +90,6 @@ const createBundle = async ({
       ],
     },
     plugins: [
-      tailwindcss(),
       cssInjectedByJsPlugin(),
       {
         name: 'dts-bundle',

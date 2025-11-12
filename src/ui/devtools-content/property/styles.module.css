@@ -1,0 +1,63 @@
+
+.property {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+  background: #1e1e1e;
+  height: 22px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  color: #616161;
+  padding-left: calc(28px + (var(--level) * 15px));
+}
+
+.property.expandable {
+  cursor: pointer;
+}
+
+.property[data-fitted='false'] {
+  opacity: 0.5;
+}
+
+.property.instance {
+  --value-color: rgb(186 130 190);
+}
+
+.property.primitive.boolean,
+.property.primitive.number,
+.property.primitive.object,
+.property.primitive.undefined,
+.property.primitive.bigint,
+.property.primitive.symbol {
+  --value-color: rgb(89, 153, 205);
+}
+
+.primitive.string {
+  --value-color: #af7249;
+}
+
+.propertyName {
+  color: rgb(204, 204, 204);
+}
+
+.propertyMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.propertyValue {
+  color: var(--value-color, #616161);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.propertyValue:has(+.propertyName) {
+  margin-right: 4px;
+}

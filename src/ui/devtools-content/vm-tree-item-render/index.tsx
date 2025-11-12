@@ -4,7 +4,7 @@ import { cx } from 'yummies/css';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
 import { VmTreeItemRenderVM } from '../../../model';
-import { Property } from './property';
+import { Property } from '../property';
 
 export const VmTreeItemRender = withViewModel(
   VmTreeItemRenderVM,
@@ -17,27 +17,31 @@ export const VmTreeItemRender = withViewModel(
       item: vmItem,
     });
 
-    const depth = model.devtools.isHierarchyMode ? vmItem.depth : 0;
-
     return (
       <>
         <div
-          className={cx(css.line, css.vmTreeItem)}
+          className={cx(css.treeItem, css.vmTreeItem)}
           data-fitted={
             itemSearchResult.isFittedByName || itemSearchResult.isFittedById
           }
-          data-depth={String().padEnd(depth, '-')}
-          style={{ '--level': depth } as CSSProperties}
+          data-depth={String().padEnd(vmItem.depth, '-')}
+          style={{ '--level': vmItem.depth } as CSSProperties}
         >
-          <header onClick={() => model.handleVmItemHeaderClick(vmItem)}>
+          <header
+            className={css.treeItemHeader}
+            onClick={() => model.handleVmItemHeaderClick(vmItem)}
+          >
             <ExpandButton
-              showIconAnyway
-              expandable={vmItem.children.length > 0}
+              showIconAnyway={model.devtools.presentationMode === 'tree'}
+              expandable={model.devtools.isExpandable(vmItem)}
               expanded={isExpanded}
-              disabled={model.devtools.isAllVmsExpandedByDefault}
             />
-            <label title={vmItem.displayName}>{vmItem.displayName}</label>
-            <span title={vmItem.vm.id}>{vmItem.vm.id}</span>
+            <label className={css.treeItemLabel} title={vmItem.displayName}>
+              {vmItem.displayName}
+            </label>
+            <span className={css.treeItemMetaText} title={vmItem.vm.id}>
+              {vmItem.vm.id}
+            </span>
           </header>
         </div>
         {vmItem.properties.map((property, order, arr) => (
@@ -51,12 +55,8 @@ export const VmTreeItemRender = withViewModel(
               { type: 'vm', item: vmItem },
               property,
             )}
-            extraRight={
-              order !== arr.length - 1 && (
-                <span className={css.propertyMeta}>{`,`}</span>
-              )
-            }
-            level={depth}
+            extraRight={order !== arr.length - 1 && `,`}
+            level={vmItem.depth}
             path={property}
           />
         ))}

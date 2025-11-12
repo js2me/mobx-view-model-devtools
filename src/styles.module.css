@@ -1,79 +1,99 @@
-@import "tailwindcss";
+.root {
+  display: contents;
+}
 
-.rootContainer * {
+.root * {
   font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
   font-size: 14px;
 }
 
 .vmButton {
-  @apply fixed z-99 size-9 cursor-pointer rounded-lg transition-all;
+  position: fixed;
+  z-index: 999999;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 150ms ease-in-out;
 
   &[data-position="top-right"], &[data-position="undefined"] {
-    @apply top-3 right-3;
+    top: 12px;
+    right: 12px;
 
     &.opened {
-      @apply -top-10;
+      top: -40px;
     }
   }
 
   &[data-position="top-left"] {
-    @apply top-3 left-3;
+    top: 12px;
+    left: 12px;
 
     &.opened {
-      @apply -top-10;
+      top: -40px;
     }
   }
 
   &[data-position="bottom-left"] {
-    @apply bottom-3 left-3;
+    bottom: 12px;
+    left: 12px;
 
     &.opened {
-      @apply -bottom-10;
+      bottom: -40px;
     }
   }
 
   &[data-position="bottom-right"] {
-    @apply bottom-3 right-3;
+    bottom: 12px;
+    right: 12px;
 
     &.opened {
-      @apply -bottom-10;
+      bottom: -40px;
     }
   }
 
   > img {
-    @apply pointer-events-none absolute inset-0 rounded-lg;
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
   }
 
   > div {
-    @apply pointer-events-none absolute inset-0 rounded-lg border-2 border-[#00000057];
+    transition: all 150ms ease-in-out;
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    border: 2px solid #00000057;
   }
 
   > span {
-    @apply -left-1 -top-1 pointer-events-none absolute flex rounded-lg bg-[#005c26cf] p-0.5 font-semibold text-[#2aff0a] text-[12px] leading-none; 
+    left: -4px;
+    top: -4px;
+    pointer-events: none;
+    position: absolute;
+    display: flex;
+    border-radius: 8px;
+    background: #005c26cf;
+    padding: 2px;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 12px;
+    color: #2aff0a;
   }
 
   &.opened {
-    @apply pointer-events-none;
+    pointer-events: none;
   }
 
   &:not(.isConnected) {
-    @apply grayscale;
+    filter: grayscale(1);
   }
 }
 
 .closePopupButton {
   width: 28px;
   padding: 6px;
-}
-
-.baseActions {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  height: 16px;
-  align-items: center;
-  margin-left: 6px;
-  margin-right: auto;
 }
 
 .hierarchyButton {
@@ -88,183 +108,95 @@
 }
 
 .vmPopup {
-  @apply fixed z-99 w-[520px] rounded-lg h-[calc(100vh_-_24px)];
+  position: fixed;
+  z-index: 999999;
+  width: 520px;
+  border-radius: 8px;
+  height: calc(100vh - 24px);
   width: calc(100vw - 34px);
   max-width: 520px;
 
   &[data-position="top-right"], &[data-position="undefined"] {
-    @apply top-3 right-3;
+    top: 12px;
+    right: 12px;
   }
 
   &[data-position="top-left"] {
-    @apply top-3 left-3;
+    top: 12px;
+    left: 12px;
   }
 
   &[data-position="bottom-left"] {
-    @apply bottom-3 left-3;
+    bottom: 12px;
+    left: 12px;
   }
 
   &[data-position="bottom-right"] {
-    @apply bottom-3 right-3;
+    bottom: 12px;
+    right: 12px;
   }
 }
 
-.vmContent {
-  color: rgb(204, 204, 204);
-  @apply bg-[#1e1e1e] overflow-auto flex flex-col;
-
-  > header {
-    @apply flex justify-between h-8 items-center pl-2 font-semibold;
-  }
-}
-
-.vmContentInput {
+.treeItemHeader {
   display: flex;
-  position: relative;
-}
-
-.vmContentInput > svg {
-  position: absolute;
-  width: 16px;
-  inset: 50% 0;
-  transform: translate(6px, -50%);
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-.vmContentInput > input  {
-  background: #343434;
-  border-radius: 4px;
-  outline: 0;
-  width: 100%;
-  padding: 3px 26px;
-  font-size: 14px;
-  text-overflow: ellipsis;
-}
-
-.vmContentInput > button {
-  position: absolute;
-  right: 6px;
-  width: 16px;
-  transform: translate(4px, -50%);
-  top: 50%;
-  opacity: 0.6;
-  display: none;
-}
-
-.vmContentInput.filled > svg {
-  opacity: 0.9;
-}
-
-.vmContentInput.filled > button {
-  display: block;
-}
-
-.vmContentTree {
-  @apply flex flex-col px-2 py-2 overflow-auto;
-  scrollbar-width: thin;
-  scrollbar-color: #81818170 #1e1e1e;
-
-  &:hover {
-    scrollbar-color: #818181 #1e1e1e;
-  }
-}
-
-.line.vmTreeItem {
-  padding-left: calc(0px + (var(--level) * 20px));
-  position: sticky;
-  top: -8px;
+  align-items: center;
+  gap: 4px;
+  margin: auto 0;
+  cursor: pointer;
+  background: #1e1e1e;
   z-index: 1;
-
-  > header {
-    @apply flex items-center gap-1 my-auto cursor-pointer bg-[#1e1e1e] z-1 truncate;
-
-    > label {
-      background: #0f6013;
-      padding: 0 4px;
-      border-radius: 4px;
-    }
-
-    > span {
-      color: #5ab65e;
-      @apply text-[14px] truncate;
-    }
-  }
-
-  &.extrasItem {
-    > header > label {
-      background: #6b6902;
-    }
-  }
-
-  &:not([data-fitted='true']) {
-    > header {
-      opacity: 0.6;
-    }
-  }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+.treeItemLabel {
+  padding: 0 4px;
+  border-radius: 4px;
+}
 
-.vmContentFilters {
-  padding: 0 8px;
-  width: 100%;
+.treeItemMetaText {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.treeItem {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
   background: #1e1e1e;
-}
-
-.propertyMeta {
-  @apply text-[#616161] truncate;
-
-  &.small {
-    @apply text-[10px];
-    line-height: 15px;
-  }
-}
-
-.propertyValue {
-  @apply text-[#616161] truncate;
-
-  &:has(+.property-name) {
-    @apply mr-1;
-  }
-}
-
-.line {
-  @apply flex items-center text-[14px] truncate whitespace-pre;
-  background: #1e1e1e;
-
   height: 22px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  position: relative;
-  padding-left: calc(28px + (var(--level) * 15px));
+  padding-left: calc(0px + (var(--level) * 20px));
+  position: sticky;
+  top: -8px;
+  z-index: 1;
+}
 
-  &.expandable {
-    cursor: pointer;
+.treeItem:not([data-fitted='true']) > header {
+  opacity: 0.6;
+}
+
+.vmTreeItem {
+  .treeItemLabel {
+    background: #0f6013;
+  }
+
+  .treeItemMetaText {
+    color: #5ab65e;
   }
 }
 
-.property {
-  &[data-fitted='false'] {
-    @apply opacity-50;
-  }
-
-  &.instance {
-    > .propertyValue {
-      color: rgb(186 130 190);
-    }
-  }
-
-  &.primitive.boolean, &.primitive.number, &.primitive.object, &.primitive.undefined, &.primitive.bigint, &.primitive.symbol {
-    > .propertyValue {
-      color: rgb(89, 153, 205);
-    } 
-  }
-
-  &.primitive.string {
-    > .propertyValue {
-      @apply text-[#af7249];
-    }
+.extrasItem {
+  .treeItemLabel {
+    background: #6b6902;
   }
 }
 

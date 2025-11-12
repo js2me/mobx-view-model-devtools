@@ -1,0 +1,115 @@
+
+
+.vmContent {
+  color: rgb(204, 204, 204);
+  background: #1e1e1e;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.vmContentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  padding-left: 8px;
+  font-weight: 600;
+}
+
+.vmContentHeaderLogo {
+  width: 16px;
+  margin-right: 6px;
+}
+
+.vmContentHeaderTitle {
+  font-size: 16px;
+  margin-right: auto;
+}
+
+.vmContentControlPanel {
+  padding: 0 8px;
+  width: 100%;
+  background: #1e1e1e;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.vmContentControlPanelActions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.hiearchyToggleButton {
+  display: flex;
+}
+
+.vmContentHeaderBaseActions {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  height: 16px;
+  align-items: center;
+  margin-left: 6px;
+  margin-right: auto;
+}
+
+
+.vmContentInput {
+  display: flex;
+  position: relative;
+  flex: 1;
+}
+
+.vmContentInput > svg {
+  position: absolute;
+  width: 16px;
+  inset: 50% 0;
+  transform: translate(6px, -50%);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.vmContentInput > input  {
+  background: #343434;
+  border-radius: 4px;
+  outline: 0;
+  width: 100%;
+  padding: 3px 26px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+
+.vmContentInput > button {
+  position: absolute;
+  right: 6px;
+  width: 16px;
+  transform: translate(4px, -50%);
+  top: 50%;
+  opacity: 0.6;
+  display: none;
+}
+
+.vmContentInput.filled > svg {
+  opacity: 0.9;
+}
+
+.vmContentInput.filled > button {
+  display: block;
+}
+
+
+.vmContentTree {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #81818170 #1e1e1e;
+}
+
+.vmContentTree:hover {
+  scrollbar-color: #818181 #1e1e1e;
+}

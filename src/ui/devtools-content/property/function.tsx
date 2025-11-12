@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
-import css from '@/styles.module.css';
+import css from './styles.module.css';
 import type { PropertyDetailedProps } from '.';
 
 export const FunctionProperty = observer((props: PropertyDetailedProps) => {
@@ -14,7 +14,7 @@ export const FunctionProperty = observer((props: PropertyDetailedProps) => {
 
   return (
     <div
-      className={cx(css.line, css.property, css.function)}
+      className={cx(css.property, css.function)}
       title={String(value)}
       style={
         { '--level': props.level, '--order': props.order } as CSSProperties
@@ -23,7 +23,7 @@ export const FunctionProperty = observer((props: PropertyDetailedProps) => {
       data-depth={String().padEnd(props.level, '-')}
     >
       <span className={css.propertyName}>{property}</span>
-      <span className={css.propertyMeta}>{`(${argLabels.join(', ')})`}</span>
+      {`(${argLabels.join(', ')})`}
       {extraRight}
     </div>
   );
