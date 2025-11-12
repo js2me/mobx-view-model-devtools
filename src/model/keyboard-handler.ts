@@ -11,25 +11,29 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
         {
           shortcuts: ['Ctrl+F12'],
           action: () => {
-            devtools.isPopupOpened = !devtools.isPopupOpened;
+            if (devtools.isPopupOpened) {
+              devtools.hidePopup();
+            } else {
+              devtools.showPopup();
+            }
           },
         },
         {
           shortcuts: ['Escape'],
           action: () => {
-            devtools.isPopupOpened = false;
+            devtools.hidePopup();
           },
         },
         {
           shortcuts: ['Ctrl+ArrowLeft'],
           action: () => {
-            devtools.isAllVmsExpandedByDefault = false;
+            devtools.collapseAllVms();
           },
         },
         {
           shortcuts: ['Ctrl+ArrowRight'],
           action: () => {
-            devtools.isAllVmsExpandedByDefault = true;
+            devtools.expandAllVMs();
           },
         },
         {

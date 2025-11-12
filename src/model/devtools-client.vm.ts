@@ -8,11 +8,15 @@ export class DevtoolsClientVM extends ViewModelImpl<{
   devtools = this.payload.devtools;
 
   handleToggleOpen = () => {
-    this.devtools.isPopupOpened = !this.devtools.isPopupOpened;
+    if (this.devtools.isPopupOpened) {
+      this.devtools.hidePopup();
+    } else {
+      this.devtools.showPopup();
+    }
   };
 
   handleClosePopupClick = () => {
-    this.devtools.isPopupOpened = false;
+    this.devtools.hidePopup();
   };
 
   willMount(): void {

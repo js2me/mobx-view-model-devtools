@@ -2,9 +2,12 @@ import {
   action,
   computed,
   makeObservable,
+  type ObservableMap,
   type ObservableSet,
   observable,
   reaction,
+  runInAction,
+  untracked,
 } from 'mobx';
 import type {
   AnyViewModel,
@@ -44,7 +47,6 @@ export class ViewModelDevtools {
   vmStore: ViewModelStoreBase;
   projectVmStore?: Maybe<ViewModelStoreBase<AnyViewModel>>;
   extras: Maybe<AnyObject>;
-  isAllVmsExpandedByDefault: boolean;
   expandedVmItemsPaths: ObservableSet<string>;
   logoUrl: string;
   inputRef: FocusableRef<HTMLInputElement>;
@@ -52,7 +54,7 @@ export class ViewModelDevtools {
   keyboardHandler: KeyboardHandler;
   searchEngine: SearchEngine;
   presentationMode: 'tree' | 'list';
-  private expandedVmsSet: ObservableSet<string>;
+  private expandedVmsMap: ObservableMap<string, boolean>;
   scrollListRef: Ref<VListHandle>;
   private autoscrollTimeout: number | undefined;
 
@@ -73,10 +75,10 @@ export class ViewModelDevtools {
     });
   }
 
-  get vmTree(): VmTreeItem[] {
-    const flattenTreeItems: VmTreeItem[] = [];
+  private get vmsData(): { flatten: VmTreeItem[]; tree: VmTreeItem[] } {
+    const flatten: VmTreeItem[] = [];
 
-    const result: VmTreeItem[] = [];
+    const tree: VmTreeItem[] = [];
 
     const createTreeItem = (
       vm: AnyVM,
@@ -84,9 +86,7 @@ export class ViewModelDevtools {
     ): VmTreeItem | null => {
       const depth = this.presentationMode === 'list' ? 0 : inputDepth;
 
-      const alreadyExistVmTreeItem = flattenTreeItems.find(
-        (it) => it.vm === vm,
-      );
+      const alreadyExistVmTreeItem = flatten.find((it) => it.vm === vm);
 
       if (alreadyExistVmTreeItem) {
         return alreadyExistVmTreeItem;
@@ -111,7 +111,15 @@ export class ViewModelDevtools {
         },
       };
 
-      flattenTreeItems.push(treeItem);
+      untracked(() => {
+        if (!this.expandedVmsMap.has(treeItem.key)) {
+          runInAction(() => {
+            this.expandedVmsMap.set(treeItem.key, true);
+          });
+        }
+      });
+
+      flatten.push(treeItem);
 
       const collectedChildren = this.allVms
         .filter((maybeChildVm) => {
@@ -129,11 +137,18 @@ export class ViewModelDevtools {
     this.rootVms.forEach((vm) => {
       const item = createTreeItem(vm, 0);
       if (item) {
-        result.push(item);
+        tree.push(item);
       }
     });
 
-    return result;
+    return {
+      flatten: flatten,
+      tree: tree,
+    };
+  }
+
+  get vmTree(): VmTreeItem[] {
+    return this.vmsData.tree;
   }
 
   get isActive() {
@@ -145,11 +160,7 @@ export class ViewModelDevtools {
   }
 
   isExpanded(vmItem: VmTreeItem) {
-    return (
-      this.expandedVmsSet.has(vmItem.key) ||
-      this.searchEngine.isActive ||
-      this.isAllVmsExpandedByDefault
-    );
+    return this.expandedVmsMap.get(vmItem.key) || this.searchEngine.isActive;
   }
 
   checkIsVmPathExpanded(vmItem: VmTreeItem, path: string) {
@@ -205,11 +216,7 @@ export class ViewModelDevtools {
   }
 
   handleVmItemHeaderClick(vmItem: VmTreeItem): void {
-    if (this.isExpanded(vmItem)) {
-      this.expandedVmsSet.delete(vmItem.key);
-    } else {
-      this.expandedVmsSet.add(vmItem.key);
-    }
+    this.expandedVmsMap.set(vmItem.key, !this.isExpanded(vmItem));
   }
 
   isExpandable(vmItem: VmTreeItem): boolean | undefined {
@@ -234,10 +241,28 @@ export class ViewModelDevtools {
 
   handleChangePresentationMode = (mode: string) => {
     this.presentationMode = mode === 'list' ? 'list' : 'tree';
-    this.isAllVmsExpandedByDefault = true;
     this.expandedVmItemsPaths.clear();
-    this.expandedVmsSet.clear();
+    this.expandedVmsMap.clear();
   };
+
+  expandAllVMs() {
+    this.expandedVmsMap.replace(
+      this.vmsData.flatten.map((it) => [it.key, true] as const),
+    );
+  }
+
+  collapseAllVms() {
+    this.expandedVmsMap.clear();
+  }
+
+  showPopup() {
+    this.isPopupOpened = true;
+    this.expandAllVMs();
+  }
+
+  hidePopup() {
+    this.isPopupOpened = false;
+  }
 
   private init() {
     reaction(
@@ -315,11 +340,10 @@ export class ViewModelDevtools {
   private constructor(public config: ViewModelDevtoolsConfig) {
     this.isPopupOpened = !!this.config.defaultIsOpened;
     this.displayType = 'popup';
-    this.extras = this.config.extras;
     this.vmStore = new ViewModelStoreImpl();
-    this.projectVmStore = this.config.viewModels;
-    this.expandedVmsSet = observable.set();
-    this.isAllVmsExpandedByDefault = true;
+    this.setExtras(this.config.extras);
+    this.setStore(this.config.viewModels);
+    this.expandedVmsMap = observable.map();
     this.presentationMode = 'tree';
     this.expandedVmItemsPaths = observable.set<string>();
     this.logoUrl =
@@ -330,20 +354,23 @@ export class ViewModelDevtools {
     this.keyboardHandler = new KeyboardHandler(this);
     this.searchEngine = new SearchEngine();
 
-    makeObservable(this, {
+    makeObservable<typeof this, 'vmsData'>(this, {
       isPopupOpened: observable.ref,
-      isAllVmsExpandedByDefault: observable,
       projectVmStore: observable.ref,
       presentationMode: observable.ref,
       extras: observable.ref,
       setStore: action,
       setExtras: action,
+      showPopup: action,
+      hidePopup: action,
       handleChangePresentationMode: action,
       handleExpandVmPropertyClick: action,
+      expandAllVMs: action,
+      collapseAllVms: action,
       handleExpandExtraPropertyClick: action,
       allVms: computed.struct,
       isActive: computed,
-      vmTree: computed.struct,
+      vmsData: computed.struct,
       rootVms: computed.struct,
     });
 
