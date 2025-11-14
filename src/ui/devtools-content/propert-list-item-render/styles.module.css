@@ -6,14 +6,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: pre;
-  background: #1e1e1e;
+  background: var(--vmd-content-bg);
   height: 22px;
   display: flex;
   flex-direction: row;
   align-items: center;
   position: relative;
-  color: #616161;
-  padding-left: calc(28px + (var(--level) * 15px));
+  color: var(--vmd-property-meta-color);
+  padding-left: calc(0px + 28px + (var(--level) * 15px));
 }
 
 .property.expandable {
@@ -25,16 +25,22 @@
 }
 
 .property.instance {
-  --value-color: rgb(186 130 190);
+  --value-color: rgb(190 113 195);
 }
 
 .property.primitive.boolean,
 .property.primitive.number,
 .property.primitive.object,
-.property.primitive.undefined,
 .property.primitive.bigint,
 .property.primitive.symbol {
   --value-color: rgb(89, 153, 205);
+}
+
+.property.primitive.undefined {
+  --value-color: #499098;
+}
+.property.primitive.null {
+  --value-color: #499098;
 }
 
 .primitive.string {
@@ -52,7 +58,7 @@
 }
 
 .propertyValue {
-  color: var(--value-color, #616161);
+  color: var(--value-color, var(--vmd-property-meta-color));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

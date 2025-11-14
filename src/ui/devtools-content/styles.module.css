@@ -1,20 +1,247 @@
 
 
-.vmContent {
-  color: rgb(204, 204, 204);
-  background: #1e1e1e;
+.vmContent[data-simplebar] {
+  position: relative;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: flex-start;
+  color: var(--vmd-base-color);
+  background: var(--vmd-bg);
+  backdrop-filter: blur(var(--vmd-base-blur));
   overflow: auto;
   display: flex;
   flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  overflow-anchor: none;
+}
+
+.vmContent[data-simplebar] :global(.simplebar-wrapper) {
+  overflow: hidden;
+  width: inherit;
+  height: inherit;
+  max-width: inherit;
+  max-height: inherit
+}
+
+.vmContent[data-simplebar] :global(.simplebar-mask) {
+  direction: inherit;
+  position: absolute;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: auto !important;
+  height: auto !important;
+  z-index: 0
+}
+
+.vmContent[data-simplebar] :global(.simplebar-offset) {
+  direction: inherit !important;
+  box-sizing: inherit !important;
+  resize: none !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-overflow-scrolling: touch
+}
+
+.vmContent[data-simplebar] :global(.simplebar-content-wrapper) {
+  direction: inherit;
+  box-sizing: border-box !important;
+  position: relative;
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none
+}
+
+.vmContent[data-simplebar] :global(.simplebar-content-wrapper)::-webkit-scrollbar,
+.vmContent[data-simplebar] :global(.simplebar-hide-scrollbar)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0
+}
+
+.vmContent[data-simplebar] :global(.simplebar-content):after,
+.vmContent[data-simplebar] :global(.simplebar-content):before {
+  content: ' ';
+  display: table
+}
+
+.vmContent[data-simplebar] :global(.simplebar-placeholder) {
+  max-height: 100%;
+  max-width: 100%;
+  width: 100%;
+  pointer-events: none
+}
+
+.vmContent[data-simplebar] :global(.simplebar-height-auto-observer-wrapper) {
+  box-sizing: inherit !important;
+  height: 100%;
+  width: 100%;
+  max-width: 1px;
+  position: relative;
+  float: left;
+  max-height: 1px;
+  overflow: hidden;
+  z-index: -1;
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+  flex-grow: inherit;
+  flex-shrink: 0;
+  flex-basis: 0
+}
+
+.vmContent[data-simplebar] :global(.simplebar-height-auto-observer) {
+  box-sizing: inherit;
+  display: block;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1000%;
+  width: 1000%;
+  min-height: 1px;
+  min-width: 1px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1
+}
+
+.vmContent[data-simplebar] :global(.simplebar-track) {
+  z-index: 1;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden
+}
+
+.vmContent[data-simplebar]:global(.simplebar-dragging) {
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none
+}
+
+.vmContent[data-simplebar]:global(.simplebar-dragging) :global(.simplebar-content) {
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none
+}
+
+.vmContent[data-simplebar]:global(.simplebar-dragging) :global(.simplebar-track) {
+  pointer-events: all
+}
+
+.vmContent[data-simplebar] :global(.simplebar-scrollbar) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 10px
+}
+
+.vmContent[data-simplebar] :global(.simplebar-scrollbar):before {
+  position: absolute;
+  content: '';
+  background: var(--vmd-scrollbar-bg-base);
+  border-radius: 7px;
+  left: 2px;
+  right: 2px;
+  opacity: 0;
+  transition: opacity .2s .5s linear
+}
+
+.vmContent[data-simplebar] :global(.simplebar-scrollbar):global(.simplebar-visible):before {
+  opacity: .5;
+  transition-delay: 0s;
+  transition-duration: 0s
+}
+
+.vmContent[data-simplebar] :global(.simplebar-track.simplebar-vertical) {
+  top: 0;
+  width: var(--vmd-scrollbar-track-size);
+}
+
+.vmContent[data-simplebar] :global(.simplebar-scrollbar):before {
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  right: 2px
+}
+
+.vmContent[data-simplebar] :global(.simplebar-track):global(.simplebar-horizontal) {
+  left: 0;
+  height: var(--vmd-scrollbar-track-size);
+}
+
+.vmContent[data-simplebar] :global(.simplebar-track.simplebar-horizontal) :global(.simplebar-scrollbar) {
+  right: auto;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  min-height: 0;
+  min-width: 10px;
+  width: auto
+}
+
+.vmContent[data-simplebar] :global(.simplebar-dummy-scrollbar-size) {
+  direction: rtl;
+  position: fixed;
+  opacity: 0;
+  visibility: hidden;
+  height: 500px;
+  width: 500px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  -ms-overflow-style: scrollbar !important
+}
+
+.vmContent[data-simplebar] :global(.simplebar-dummy-scrollbar-size)>div {
+  width: 200%;
+  height: 200%;
+  margin: 10px 0
+}
+
+.vmContent[data-simplebar] :global(.simplebar-hide-scrollbar) {
+  position: fixed;
+  left: 0;
+  visibility: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none
 }
 
 .vmContentHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 32px;
-  padding-left: 8px;
-  font-weight: 600;
+  flex-direction: column;
+  height: var(--vmd-header-height);
+  flex: none;
+  padding: 0 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .vmContentHeaderLogo {
@@ -23,16 +250,28 @@
 }
 
 .vmContentHeaderTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: none;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.vmContentHeaderTitleText {
   font-size: 16px;
   margin-right: auto;
 }
 
 .vmContentControlPanel {
-  padding: 0 8px;
   width: 100%;
-  background: #1e1e1e;
+  height: var(--vmd-control-panel-height);
+  flex: none;
+  padding-bottom: 4px;
+  flex: none;
   display: flex;
   flex-direction: row;
+  z-index: 1;
   gap: 4px;
 }
 
@@ -45,17 +284,6 @@
 .hiearchyToggleButton {
   display: flex;
 }
-
-.vmContentHeaderBaseActions {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  height: 16px;
-  align-items: center;
-  margin-left: 6px;
-  margin-right: auto;
-}
-
 
 .vmContentInput {
   display: flex;
@@ -73,7 +301,8 @@
 }
 
 .vmContentInput > input  {
-  background: #343434;
+  background: var(--vmd-control-bg);
+  border: 1px solid var(--vmd-control-border);
   border-radius: 4px;
   outline: 0;
   width: 100%;
@@ -100,16 +329,47 @@
   display: block;
 }
 
-
-.vmContentTree {
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #81818170 #1e1e1e;
+.vmContentVirtualized {
+  flex: 1;
 }
 
-.vmContentTree:hover {
-  scrollbar-color: #818181 #1e1e1e;
+.vmContentVirtualized > div > div {
+  height: 22px;
+}
+
+.gradientBlur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 12px);
+  pointer-events: none;
+  
+  /* Основной черный градиент */
+  background: linear-gradient(
+    to bottom,
+    var(--vmd-overlay-bg) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.gradientBlur::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  
+  /* Маска для постепенного размытия */
+  -webkit-mask: linear-gradient(
+    to bottom,
+    var(--vmd-overlay-bg) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask: linear-gradient(
+    to bottom,
+    var(--vmd-overlay-bg) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }

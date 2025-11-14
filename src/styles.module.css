@@ -1,3 +1,5 @@
+@import './theme.css';
+
 .root {
   display: contents;
 }
@@ -109,13 +111,14 @@
 }
 
 .vmPopup {
-  position: fixed;
+  position: fixed !important;
   z-index: 999999;
   width: 520px;
   border-radius: 8px;
   height: calc(100vh - 24px);
   width: calc(100vw - 34px);
   max-width: 520px;
+  box-shadow: 0 5px 20px #00000066;
 
   &[data-position="top-right"], &[data-position="undefined"] {
     top: 12px;
@@ -144,7 +147,6 @@
   gap: 4px;
   margin: auto 0;
   cursor: pointer;
-  background: #1e1e1e;
   z-index: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,14 +172,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: pre;
-  background: #1e1e1e;
   height: 22px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding-left: calc(0px + (var(--level) * 20px));
+  padding-left: calc(8px + (var(--level) * 20px));
   position: sticky;
-  top: -8px;
+  top: calc(var(--vmd-header-height) + var(--vmd-control-panel-height));
   z-index: 1;
 }
 
@@ -187,17 +188,17 @@
 
 .vmTreeItem {
   .treeItemLabel {
-    background: #0f6013;
+    background: var(--vmd-primary-bg);
   }
 
   .treeItemMetaText {
-    color: #5ab65e;
+    color: var(--vmd-primary-color);
   }
 }
 
 .extrasItem {
   .treeItemLabel {
-    background: #6b6902;
+    background: var(--vmd-secondary-bg);
   }
 }
 

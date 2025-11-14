@@ -1,0 +1,23 @@
+:root {
+    --vmd-base-blur: 2px;
+
+    --vmd-bg: #000000d9;
+    --vmd-overlay-bg: #272727;
+
+    --vmd-base-color: #ccc;
+    --vmd-control-active-bg: #e6e6e682;
+    --vmd-control-active-color: #181818;
+    --vmd-control-inactive-color: #8b8b8b;
+    --vmd-control-border: #5b5468a6;
+    --vmd-control-bg: transparent;
+    --vmd-bg-transparent: #1f1c2600;
+    --vmd-content-bg: transparent;
+    --vmd-scrollbar-track-size: 8px;
+    --vmd-scrollbar-bg-base: #81818170;
+    --vmd-scrollbar-bg-active: #818181;
+    --vmd-property-meta-color: #616161;
+    --vmd-primary-bg: #0f6013;
+    --vmd-primary-color: #5ab65e;
+    --vmd-secondary-bg: #6b6902;
+    --vmd-header-height: 60px;
+}

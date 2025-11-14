@@ -1,6 +1,5 @@
-import { action, runInAction } from 'mobx';
+import { runInAction } from 'mobx';
 import { type CreateRefConfig, createRef, type Ref } from 'yummies/mobx';
-import type { Maybe } from 'yummies/types';
 
 export interface FocusableRef<T extends HTMLElement = HTMLElement>
   extends Ref<T, { focused: boolean }> {}
@@ -8,36 +7,26 @@ export interface FocusableRef<T extends HTMLElement = HTMLElement>
 export const createFocusableRef = <T extends HTMLElement = HTMLElement>(
   cfg?: Pick<CreateRefConfig<T>, 'onSet' | 'onUnset'>,
 ): FocusableRef<T> => {
-  const handleFocus = action(() => {
-    ref.meta.focused = true;
-  });
-
-  const handleBlur = action(() => {
-    ref.meta.focused = false;
-  });
-
-  let lastNode: Maybe<T>;
+  const refreshFocused = () => {
+    runInAction(() => {
+      ref.meta.focused = document.activeElement === ref.current;
+    });
+  };
 
   const ref = createRef({
     meta: {
       focused: false,
     },
-    onSet: (node: T) => {
-      if (document.activeElement === node) {
-        runInAction(() => {
-          ref.meta.focused = true;
-        });
-      }
-      node.addEventListener('focus', handleFocus);
-      node.addEventListener('blur', handleBlur);
-      cfg?.onSet?.(node);
-      lastNode = node;
+    onSet: (curr: T, prev) => {
+      refreshFocused();
+      curr.addEventListener('focus', refreshFocused, true);
+      curr.addEventListener('blur', refreshFocused, true);
+      cfg?.onSet?.(curr, prev);
     },
-    onUnset: () => {
-      cfg?.onUnset?.();
-      lastNode?.removeEventListener('focus', handleFocus);
-      lastNode?.removeEventListener('blur', handleBlur);
-      lastNode = undefined;
+    onUnset: (last) => {
+      cfg?.onUnset?.(last);
+      last?.removeEventListener('focus', refreshFocused, true);
+      last?.removeEventListener('blur', refreshFocused, true);
     },
   });
 

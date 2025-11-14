@@ -1,10 +1,10 @@
 import type { AnyViewModel, AnyViewModelSimple } from 'mobx-view-model';
-import type { Maybe } from 'yummies/types';
+import type { VMListItem } from './list-item/vm-list-item';
 
 export type AnyVM = AnyViewModelSimple | AnyViewModel;
 
 export type VmTreeItem = {
-  parent: Maybe<VmTreeItem>;
+  listItem: VMListItem;
   vm: AnyVM;
   displayName: string;
   children: VmTreeItem[];

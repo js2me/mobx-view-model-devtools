@@ -1,6 +1,6 @@
 import { action, computed, makeObservable, observable } from 'mobx';
 import type { AnyObject } from 'yummies/types';
-import type { VmTreeItem } from './types';
+import type { VMListItem } from './list-item/vm-list-item';
 import {
   createFocusableRef,
   type FocusableRef,
@@ -18,7 +18,7 @@ export interface SearchResult {
 }
 
 export type SearchInput =
-  | { type: 'vm'; item: VmTreeItem }
+  | { type: 'vm'; item: VMListItem }
   | { type: 'extras'; item: AnyObject };
 
 export class SearchEngine {
@@ -31,7 +31,7 @@ export class SearchEngine {
 
   private searchTextUpdateTimeout: number | undefined;
 
-  private segments: string[] = [];
+  segments: string[] = [];
 
   private get cache() {
     this.fittedVmIds.clear();
@@ -99,15 +99,15 @@ export class SearchEngine {
       }
     }
 
-    if (item.vm.id && isFittedById) {
-      this.fittedVmIds.add(item.vm.id);
+    if (item.data.id && isFittedById) {
+      this.fittedVmIds.add(item.data.id);
     }
 
     const isFittedByPropertyPath = false;
     let fullFittedProperty: string | undefined;
 
     if (propSegmentsToCheck.length) {
-      item.properties.forEach((origProperty) => {
+      item.propertyListItems.forEach((origProperty) => {
         const property = origProperty.toLowerCase();
 
         for (const segment of propSegmentsToCheck) {
@@ -142,7 +142,6 @@ export class SearchEngine {
       isFittedById,
       isFittedByName,
       isFittedByPropertyPath,
-      fittedProperties,
       fullFittedProperty,
       isFittedAllProperties,
       fittedPath: this.segments,

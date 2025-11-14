@@ -13,7 +13,8 @@
   width: 16px;
   padding: 1px;
   box-sizing: content-box;
-  background: #515151;
+  background: var(--vmd-control-active-bg);
+  backdrop-filter: blur(var(--vmd-base-blur));
   border-radius: 4px;
   transition: all 149ms ease;
   transform: translateX(calc(20px * var(--index)));
@@ -27,6 +28,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 149ms ease;
+  color: var(--vmd-control-inactive-color);
+
+  &.active {
+    color: var(--vmd-control-active-color);
+  }
 }
 
 .option > svg {

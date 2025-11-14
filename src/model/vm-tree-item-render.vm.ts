@@ -1,11 +1,12 @@
 import { action, makeObservable } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
 import { ViewModelImpl } from './lib/view-model.impl';
+import type { VMListItem } from './list-item/vm-list-item';
 import type { VmTreeItem } from './types';
 import type { ViewModelDevtools } from './view-model-devtools';
 
 type VmTreeItemRenderPayload = {
-  vmItem: VmTreeItem;
+  vmItem: VMListItem;
   devtools: ViewModelDevtools;
 };
 
@@ -19,20 +20,9 @@ export class VmTreeItemRenderVM extends ViewModelImpl<
     super(vmParams);
 
     makeObservable<typeof this>(this, {
-      handleExpandPropertyClick: action,
       handleVmItemHeaderClick: action,
     });
   }
 
-  isPathExpanded(path: string) {
-    return this.devtools.checkIsVmPathExpanded(this.payload.vmItem, path);
-  }
 
-  handleExpandPropertyClick(path: string): void {
-    this.devtools.handleExpandVmPropertyClick(this.payload.vmItem, path);
-  }
-
-  handleVmItemHeaderClick(vmItem: VmTreeItem): void {
-    this.devtools.handleVmItemHeaderClick(vmItem);
-  }
 }

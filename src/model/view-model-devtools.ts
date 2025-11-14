@@ -2,12 +2,9 @@ import {
   action,
   computed,
   makeObservable,
-  type ObservableMap,
   type ObservableSet,
   observable,
   reaction,
-  runInAction,
-  untracked,
 } from 'mobx';
 import type {
   AnyViewModel,
@@ -16,7 +13,7 @@ import type {
 } from 'mobx-view-model';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { VListHandle } from 'virtua';
+import type { VirtualizerHandle, VListHandle } from 'virtua';
 import { createRef, type Ref } from 'yummies/mobx';
 import type { AnyObject, Maybe } from 'yummies/types';
 import { DevtoolsClient } from '@/ui/devtools-client';
@@ -24,13 +21,11 @@ import css from '../styles.module.css';
 import { KeyboardHandler } from './keyboard-handler';
 import { ViewModelImpl } from './lib/view-model.impl';
 import { ViewModelStoreImpl } from './lib/view-model-store.impl';
+import type { ListItem } from './list-item/list-item';
+import type { PropertyListItem } from './list-item/property-list-item';
+import { VMListItem } from './list-item/vm-list-item';
 import { SearchEngine } from './search-engine';
-import type { AnyVM, VmTreeItem } from './types';
-import {
-  createFocusableRef,
-  type FocusableRef,
-} from './utils/create-focusable-ref';
-import { getAllKeys } from './utils/get-all-keys';
+import type { AnyVM } from './types';
 
 export interface ViewModelDevtoolsConfig {
   containerId?: string;
@@ -49,13 +44,14 @@ export class ViewModelDevtools {
   extras: Maybe<AnyObject>;
   expandedVmItemsPaths: ObservableSet<string>;
   logoUrl: string;
-  inputRef: FocusableRef<HTMLInputElement>;
   scrollContentRef: Ref<HTMLDivElement>;
   keyboardHandler: KeyboardHandler;
   searchEngine: SearchEngine;
   presentationMode: 'tree' | 'list';
-  private expandedVmsMap: ObservableMap<string, boolean>;
-  scrollListRef: Ref<VListHandle>;
+  scrollListRef: Ref<VirtualizerHandle>;
+
+  anyCache = observable.map<string, any>();
+
   private autoscrollTimeout: number | undefined;
 
   get allVms() {
@@ -68,87 +64,17 @@ export class ViewModelDevtools {
     );
   }
 
-  get rootVms() {
-    return this.allVms.filter((vm) => {
-      const vmParams = this.getVmParams(vm);
-      return !vmParams || vmParams.parentViewModel == null;
-    });
+  private get rootVmListItems() {
+    return this.allVms
+      .filter((vm) => {
+        const vmParams = this.getVmParams(vm);
+        return !vmParams || vmParams.parentViewModel == null;
+      })
+      .map((vm) => new VMListItem(this, vm, this.allVms));
   }
 
-  private get vmsData(): { flatten: VmTreeItem[]; tree: VmTreeItem[] } {
-    const flatten: VmTreeItem[] = [];
-
-    const tree: VmTreeItem[] = [];
-
-    const createTreeItem = (
-      vm: AnyVM,
-      inputDepth: number,
-    ): VmTreeItem | null => {
-      const depth = this.presentationMode === 'list' ? 0 : inputDepth;
-
-      const alreadyExistVmTreeItem = flatten.find((it) => it.vm === vm);
-
-      if (alreadyExistVmTreeItem) {
-        return alreadyExistVmTreeItem;
-      }
-
-      const vmParams = this.getVmParams(vm);
-      const parentVm = vmParams?.parentViewModel || null;
-
-      const displayName = vm.constructor.name;
-
-      const treeItem: VmTreeItem = {
-        parent: parentVm ? createTreeItem(parentVm, depth - 1) : null,
-        vm,
-        displayName,
-        children: [],
-        depth,
-        key: `${displayName}-${vm.id}-${depth}`,
-        properties: getAllKeys(vm),
-        searchData: {
-          name: displayName.toLowerCase().trim(),
-          id: (vm.id || '').toLowerCase().trim(),
-        },
-      };
-
-      untracked(() => {
-        if (!this.expandedVmsMap.has(treeItem.key)) {
-          runInAction(() => {
-            this.expandedVmsMap.set(treeItem.key, true);
-          });
-        }
-      });
-
-      flatten.push(treeItem);
-
-      const collectedChildren = this.allVms
-        .filter((maybeChildVm) => {
-          const params = this.getVmParams(maybeChildVm);
-          return params?.parentViewModel && params.parentViewModel === vm;
-        })
-        .map((childVm) => createTreeItem(childVm, depth + 1))
-        .filter((it): it is VmTreeItem => Boolean(it));
-
-      treeItem.children.push(...collectedChildren);
-
-      return treeItem;
-    };
-
-    this.rootVms.forEach((vm) => {
-      const item = createTreeItem(vm, 0);
-      if (item) {
-        tree.push(item);
-      }
-    });
-
-    return {
-      flatten: flatten,
-      tree: tree,
-    };
-  }
-
-  get vmTree(): VmTreeItem[] {
-    return this.vmsData.tree;
+  get listItems(): ListItem<any>[] {
+    return this.rootVmListItems.flatMap((it) => it.expandedChildrenWithSelf);
   }
 
   get isActive() {
@@ -159,11 +85,11 @@ export class ViewModelDevtools {
     return this.config.containerId ?? 'view-model-devtools';
   }
 
-  isExpanded(vmItem: VmTreeItem) {
-    return this.expandedVmsMap.get(vmItem.key) || this.searchEngine.isActive;
+  isExpanded(vmItem: VMListItem) {
+    return vmItem.isExpanded || this.searchEngine.isActive;
   }
 
-  checkIsVmPathExpanded(vmItem: VmTreeItem, path: string) {
+  checkIsVmPathExpanded(vmItem: VMListItem, path: string) {
     const searchResult = this.searchEngine.getSearchResult({
       item: vmItem,
       type: 'vm',
@@ -195,7 +121,7 @@ export class ViewModelDevtools {
     return this.expandedVmItemsPaths.has(expandedKey);
   }
 
-  handleExpandVmPropertyClick(vmItem: VmTreeItem, path: string) {
+  handleExpandVmPropertyClick(vmItem: VMListItem, path: string) {
     const expandedKey = `${vmItem.key}%%%${path}`;
 
     if (this.expandedVmItemsPaths.has(expandedKey)) {
@@ -203,6 +129,13 @@ export class ViewModelDevtools {
     } else {
       this.expandedVmItemsPaths.add(expandedKey);
     }
+  }
+
+  handlePropertyClick(
+    item: PropertyListItem,
+    e: React.MouseEvent<HTMLElement>,
+  ) {
+    item.toggleExpand();
   }
 
   handleExpandExtraPropertyClick(path: string) {
@@ -215,12 +148,12 @@ export class ViewModelDevtools {
     }
   }
 
-  handleVmItemHeaderClick(vmItem: VmTreeItem): void {
-    this.expandedVmsMap.set(vmItem.key, !this.isExpanded(vmItem));
+  handleVmItemHeaderClick(vmItem: VMListItem): void {
+    vmItem.toggleExpand();
   }
 
-  isExpandable(vmItem: VmTreeItem): boolean | undefined {
-    return vmItem.children.length > 0 && this.presentationMode !== 'list';
+  isExpandable(vmItem: VMListItem): boolean | undefined {
+    return vmItem.isExpandable && this.presentationMode !== 'list';
   }
 
   private getVmParams(vm: AnyVM): null | ViewModelParams {
@@ -242,17 +175,17 @@ export class ViewModelDevtools {
   handleChangePresentationMode = (mode: string) => {
     this.presentationMode = mode === 'list' ? 'list' : 'tree';
     this.expandedVmItemsPaths.clear();
-    this.expandedVmsMap.clear();
+    // this.expandedVmsMap.clear();
   };
 
   expandAllVMs() {
-    this.expandedVmsMap.replace(
-      this.vmsData.flatten.map((it) => [it.key, true] as const),
-    );
+    // this.expandedVmsMap.replace(
+    //   this.vmsData.flatten.map((it) => [it.key, true] as const),
+    // );
   }
 
   collapseAllVms() {
-    this.expandedVmsMap.clear();
+    // this.expandedVmsMap.clear();
   }
 
   showPopup() {
@@ -276,8 +209,8 @@ export class ViewModelDevtools {
             return;
           }
 
+          let nextOffset: number = 0;
           let maxLevel = 0;
-          let lastFoundElementIndex: number | undefined;
 
           const htmlCollection = document.querySelectorAll(
             `#${this.containerId} [data-fitted]`,
@@ -291,20 +224,13 @@ export class ViewModelDevtools {
                 element.dataset.depth.length >= maxLevel
               ) {
                 maxLevel = element.dataset.depth!.length;
-                lastFoundElementIndex = index;
+                nextOffset =
+                  this.scrollListRef.current?.getItemOffset(index) ?? 0;
               }
             },
           );
 
-          if (lastFoundElementIndex === undefined) {
-            this.scrollListRef.current?.scrollTo(90);
-          } else {
-            this.scrollListRef.current?.scrollToIndex(lastFoundElementIndex, {
-              align: 'center',
-              offset: -65,
-              smooth: true,
-            });
-          }
+          this.scrollListRef.current?.scrollTo(nextOffset);
         }, 200);
       },
     );
@@ -343,18 +269,16 @@ export class ViewModelDevtools {
     this.vmStore = new ViewModelStoreImpl();
     this.setExtras(this.config.extras);
     this.setStore(this.config.viewModels);
-    this.expandedVmsMap = observable.map();
     this.presentationMode = 'tree';
     this.expandedVmItemsPaths = observable.set<string>();
     this.logoUrl =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAMAAADW3miqAAACTFBMVEUvEQFCGQIuEQFAGALpZhjoZhlgJANAGALrZhiAMAR1KwNKHAJXIAM4FQFsKgWUNgL09PYvEQCgPARoJwNRHgL////U0dCoSRGSPgzFTQljKwl5MggjDQHm5ORWsU2JNATWWBC4SQxsMQysQAX6+vra2NbMUQtRJQxWLgu/SAXf3t62tLOyr6zCbTecSxmyQQLIxcDAvbqbmZaVeWeKc2WgRBB/OhCMOQu4QwPt7e/DuLCYz5NoOB2tqqdsaGVhW1NagUJtTjtkYCe8XyaRRRiHRRTi29XKyMfr0cG2p5yag3JfVElMR0GfcjBVMx/KWRnoYxXdXhRzQBB0OA3n6OrOzM2npKPLq5frs5TUpo2umounkHp3cm6mgWqBbGB8aVZzYVBXnktWT0eYY0BYZzOGazGmWi3IYid1QSOxTxZYSBQ6IBFFJA6lPAP/8uvR2s3qybbSwLW8q6G3nYigm4B8fHvxonW9kXWSjGhrgl5vZlpZqk+ZdE5cjE16fkzuh0q9eUetcUKAWEBpdj90bjg/PDfteDRZdTGwaS6sYCljVCl2TCflbCJZYSKlVSJfRh/dZB2OWR1nRhFfNRHO48zo1crjwamuv5SfqpSXtpGro4bEm4SMhoGFu3yQlHqFf3l5tHKtjHCFe2ageWLSimBnYFuue1hYlk1uikCCYT5XijqRWjdNPTLRcS5VVCC7WB3WYBtsTRYmHBNYPxLA3bzwv6LVsZ+4tJyQxYqHqHvVlnJzn2uegF39l1t1oEiKjzyAdjpeRDShaClCLR/JXT/FAAAABnRSTlP7uLgrtivDuZKUAAAElElEQVQ4yyWURXsbMRRFpyRF0vCM2a6ZmWPXYWqwTVKGMDRNUmZmZmZmZub+scrp3bzN+e65q8dMmQwBwqwKnLZTNrsVDW/Y8P3AgRJPKcK8ykHIMZOmMJMgAYAlimCwGQRsHdHpayOv2tsN4wJmIZTMEiSTGMgRQoCC/B5ZAYIu/fylIthsBlkAHCeZKaNChuE4yKkA2w2IAKtdhyNpWY76ZUwkFZkIUFmeNTPU6vUadSMOOg2htNWURRhRkwQBr9OlHXQNYTipbVHZ6tX5JiPGKgsgUBQWUgckMDX/woIFC+uwzEhcWz43J6ANVgEC+dpIrcJyEp8+MeR4k4hpz696PyTIdBMZ+jAv0RBqGXPUZkw1YT0AEtCFw/3NiVgiVbWMR5hCJnnZs5uB+PoeB4pk9OFaoM9adTVDXeXzGm7+9fI8AIwEsiwBV12BYIWZmCL6DIBGozGt8+6vCLmbOp8e0vF0uMKzrH7hnHii3GyGpgjiOcLr9QDubwlaFj3d9oD6GcIqQM1enVO25FobqD1x2IQIp/KAjPUtabCs7e/fHR7hGQAUDqKN4rz9fb/XrJrf76gzcuqexsY91xJaS2Pq7oNdNVaGZ4kElaWituXNaF50b3p8uoN451m02y6VaS1rkksXbwybGMJBSMBSSy5YPtqUs6zbse816HHn8jsuB91zGpNNi2/vyjAsYGmSWm080VblFj9WV589eylnSR7ZnHDnGrvvbNq2K8JgwALCJhtCFVsKjnwgftLnexsKxE4uHyiPB9ZV79s3uHuYwbSKA3e1oeYWn3GxO17lW34kblnke7F5SVCb8lUf6aibxSgYEAhS2mDfs1GuKqa98WLghltb5Tv+dX1obtdY5YBD384gpAIWbmkI9TR7Ve+awMrNe1eK1Hbw1voQbTr46PSrEsaOAVak+7F8d/OYz5sMiJc/uzQXB45Xfpo719L0tvrn85ISxmYFkFe7YmXdPaNecHSueO6cRrzV++TJDFF0rVt+pvVYEbIDs0RS2rKKLW2s0bgoJ7o077ZunT59hkajuXKm82XJBKRAs5R0l/VVnOWNxscB0eW63jt9AnJd6ch6JiCnwkJzyhJqqSjwDkdHXnSt3P7wPyQuNgkTkB1jOryrPth8v+Do7Oz8Vl+/6eD2CZ1LXKsXxtsp5EQAQph0B8vLl2FTpq7u6NEzxysfFiHRchsjq392CQN4IJkLa93xJd0Zkykbqct0vK6urOwtNlmWYgVFKQQh6yvsnl8fu0OLsD4dOXF6cO/eyu2910WNuGDnvfApqlPUwoYFq2bWr97D026driZ8uHVw8NeORz8uipoVK1wrdhZ1oHDvy8KF8zfqMUZpnW54uKbm8KFDf1pbWy+cn0lThFSWEG/WaOQF2SrbnbJ9Fo3H4xnJoKzDaNJTG90kQcIKCAAcLaVxGuz0B/k9HpssOJ0I20uKEGOGHCsIPAAoGnU6x52lfkPU7zfMNsjRUsFqmIAmmzmJIISBCpAgO6OCMC7T47H5BdqP2ikzlb5DxswBjAAhvFX2+2UrRgIyHDtwzGMoFexFZto/HbAJBdFwHOYAAAAASUVORK5CYII=';
-    this.inputRef = createFocusableRef<HTMLInputElement>();
     this.scrollContentRef = createRef<HTMLDivElement>();
     this.scrollListRef = createRef<VListHandle>();
     this.keyboardHandler = new KeyboardHandler(this);
     this.searchEngine = new SearchEngine();
 
-    makeObservable<typeof this, 'vmsData'>(this, {
+    makeObservable<typeof this, 'rootVmListItems'>(this, {
       isPopupOpened: observable.ref,
       projectVmStore: observable.ref,
       presentationMode: observable.ref,
@@ -368,10 +292,8 @@ export class ViewModelDevtools {
       expandAllVMs: action,
       collapseAllVms: action,
       handleExpandExtraPropertyClick: action,
-      allVms: computed.struct,
       isActive: computed,
-      vmsData: computed.struct,
-      rootVms: computed.struct,
+      rootVmListItems: computed.struct,
     });
 
     this.render();

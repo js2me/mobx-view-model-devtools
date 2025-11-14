@@ -26,7 +26,9 @@ export const IconToggleButton = ({
     }
 
     optionNodes.push(
-      <div className={css.option} key={i}>
+      <div className={cx(css.option, {
+        [css.active]: isActive
+      })} key={i}>
         <Icon />
       </div>,
     );

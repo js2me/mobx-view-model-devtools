@@ -5,7 +5,7 @@ import { ExtrasItemRenderVM } from '@/model';
 import { getAllKeys } from '@/model/utils/get-all-keys';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
-import { Property } from '../property';
+import { PropertyListItemRender } from '../propert-list-item-render';
 
 export const ExtrasItemRender = withViewModel(
   ExtrasItemRenderVM,
@@ -20,7 +20,7 @@ export const ExtrasItemRender = withViewModel(
       <>
         <div
           className={cx(css.treeItem, css.vmTreeItem, css.extrasItem)}
-          data-fitted={'true'}
+          data-fitted={item.isFitted}
           data-depth={String().padEnd(depth, '-')}
           style={{ '--level': depth } as CSSProperties}
         >
@@ -30,7 +30,7 @@ export const ExtrasItemRender = withViewModel(
           </header>
         </div>
         {keys.map((property, order) => (
-          <Property
+          <PropertyListItemRender
             model={model}
             name={property}
             order={order}

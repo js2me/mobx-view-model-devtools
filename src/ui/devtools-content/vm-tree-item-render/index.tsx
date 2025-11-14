@@ -1,73 +1,34 @@
-import { withViewModel } from 'mobx-view-model';
+import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
+import type { VMListItem } from '@/model/list-item/vm-list-item';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/expand-button';
-import { VmTreeItemRenderVM } from '../../../model';
-import { Property } from '../property';
 
-export const VmTreeItemRender = withViewModel(
-  VmTreeItemRenderVM,
-  ({ model }) => {
-    const vmItem = model.payload.vmItem;
-    const isExpanded = model.devtools.isExpanded(vmItem);
-
-    const itemSearchResult = model.devtools.searchEngine.getSearchResult({
-      type: 'vm',
-      item: vmItem,
-    });
-
-    return (
-      <>
-        <div
-          className={cx(css.treeItem, css.vmTreeItem)}
-          data-fitted={
-            itemSearchResult.isFittedByName || itemSearchResult.isFittedById
-          }
-          data-depth={String().padEnd(vmItem.depth, '-')}
-          style={{ '--level': vmItem.depth } as CSSProperties}
-        >
-          <header
-            className={css.treeItemHeader}
-            onClick={() => model.handleVmItemHeaderClick(vmItem)}
-          >
-            <ExpandButton
-              showIconAnyway={model.devtools.presentationMode === 'tree'}
-              expandable={model.devtools.isExpandable(vmItem)}
-              expanded={isExpanded}
-            />
-            <label className={css.treeItemLabel} title={vmItem.displayName}>
-              {vmItem.displayName}
-            </label>
-            <span className={css.treeItemMetaText} title={vmItem.vm.id}>
-              {vmItem.vm.id}
-            </span>
-          </header>
-        </div>
-        {vmItem.properties.map((property, order, arr) => (
-          <Property
-            model={model}
-            name={property}
-            order={order}
-            value={(vmItem.vm as any)[property]}
-            key={property}
-            isFitted={model.devtools.searchEngine.getSearchPropertyResult(
-              { type: 'vm', item: vmItem },
-              property,
-            )}
-            extraRight={order !== arr.length - 1 && `,`}
-            level={vmItem.depth}
-            path={property}
-          />
-        ))}
-        {isExpanded &&
-          vmItem.children.map((child) => (
-            <VmTreeItemRender
-              key={child.key}
-              payload={{ vmItem: child, devtools: model.devtools }}
-            />
-          ))}
-      </>
-    );
-  },
-);
+export const VmTreeItemRender = observer(({ item }: { item: VMListItem }) => {
+  return (
+    <div
+      className={cx(css.treeItem, css.vmTreeItem)}
+      data-fitted={item.isFitted}
+      data-depth={item.depthLine}
+      style={{ '--level': item.depth } as CSSProperties}
+    >
+      <header
+        className={css.treeItemHeader}
+        onClick={() => item.devtools.handleVmItemHeaderClick(item)}
+      >
+        <ExpandButton
+          showIconAnyway={item.devtools.presentationMode === 'tree'}
+          expandable={item.devtools.isExpandable(item)}
+          expanded={item.isExpanded}
+        />
+        <label className={css.treeItemLabel} title={item.displayName}>
+          {item.displayName}
+        </label>
+        <span className={css.treeItemMetaText} title={item.data.id}>
+          {item.data.id}
+        </span>
+      </header>
+    </div>
+  );
+});
