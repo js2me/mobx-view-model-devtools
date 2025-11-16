@@ -12,7 +12,7 @@
   height: 16px;
   width: 16px;
   padding: 1px;
-  box-sizing: content-box;
+  box-sizing: content-box !important;
   background: var(--vmd-control-active-bg);
   backdrop-filter: blur(var(--vmd-base-blur));
   border-radius: 4px;

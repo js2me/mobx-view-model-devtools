@@ -33,140 +33,8 @@ export class SearchEngine {
 
   segments: string[] = [];
 
-  private get cache() {
-    this.fittedVmIds.clear();
-    this.formattedSearchText;
-    return new Map<string, SearchResult>();
-  }
-
   get isActive() {
     return !!this.formattedSearchText;
-  }
-
-  private defaultSearchResult: SearchResult = {
-    isFitted: true,
-    isFittedByName: true,
-    fittedProperties: [],
-    fittedPath: [],
-  };
-
-  getSearchResult(input: SearchInput): SearchResult {
-    if (!this.isActive) {
-      return this.defaultSearchResult;
-    }
-
-    if (input.type === 'extras') {
-      return this.defaultSearchResult;
-    }
-
-    const { item } = input;
-
-    if (this.cache.has(item.key)) {
-      return this.cache.get(item.key)!;
-    }
-
-    if (!this.segments.length) {
-      return this.defaultSearchResult;
-    }
-
-    const isFittedByProperty = false;
-    let fittedProperties: string[] = [];
-
-    const firstSegment = this.segments[0];
-    const secondSegment = this.segments[1];
-
-    let propSegmentsToCheck: string[] = [];
-
-    let isFittedById: boolean;
-    let isFittedByName: boolean;
-    let isFittedAllProperties: boolean | undefined;
-
-    if (secondSegment) {
-      isFittedById = item.searchData.id === firstSegment;
-      isFittedByName = item.searchData.name === firstSegment;
-
-      if (isFittedById || isFittedByName) {
-        propSegmentsToCheck = [secondSegment];
-      } else {
-        propSegmentsToCheck = [firstSegment];
-      }
-    } else {
-      isFittedById = item.searchData.id.startsWith(firstSegment);
-      isFittedByName = item.searchData.name.startsWith(firstSegment);
-
-      if (!isFittedById && !isFittedByName) {
-        propSegmentsToCheck = [firstSegment];
-      }
-    }
-
-    if (item.data.id && isFittedById) {
-      this.fittedVmIds.add(item.data.id);
-    }
-
-    const isFittedByPropertyPath = false;
-    let fullFittedProperty: string | undefined;
-
-    if (propSegmentsToCheck.length) {
-      item.propertyListItems.forEach((origProperty) => {
-        const property = origProperty.toLowerCase();
-
-        for (const segment of propSegmentsToCheck) {
-          const isFullFitted = property === segment;
-
-          if (isFullFitted) {
-            fullFittedProperty = property;
-            fittedProperties.push(origProperty);
-            return;
-          }
-
-          const isFittedProperty = !!segment && property.startsWith(segment);
-
-          if (isFittedProperty) {
-            fittedProperties.push(origProperty);
-          }
-        }
-      });
-    } else {
-      fittedProperties = item.properties;
-      isFittedAllProperties = true;
-    }
-
-    const isFitted =
-      isFittedByName ||
-      isFittedById ||
-      isFittedByProperty ||
-      isFittedByPropertyPath;
-
-    this.cache.set(item.key, {
-      isFitted,
-      isFittedById,
-      isFittedByName,
-      isFittedByPropertyPath,
-      fullFittedProperty,
-      isFittedAllProperties,
-      fittedPath: this.segments,
-    });
-
-    return this.cache.get(item.key)!;
-  }
-
-  getSearchPropertyResult(input: SearchInput, property: string): boolean {
-    if (!this.isActive) {
-      return true;
-    }
-
-    const searchResult = this.getSearchResult(input);
-
-    if (
-      input.type === 'vm' &&
-      searchResult.isFittedAllProperties &&
-      input.item.vm.id &&
-      !this.fittedVmIds.has(input.item.vm.id)
-    ) {
-      return false;
-    }
-
-    return searchResult.fittedProperties.includes(property);
   }
 
   private setSearchText(searchText: string) {
@@ -178,8 +46,6 @@ export class SearchEngine {
     if (!this.formattedSearchText) {
       return;
     }
-
-    const segments: string[] = this.segments;
 
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     let strictSearchByProperties = false;
@@ -226,12 +92,12 @@ export class SearchEngine {
       // }
 
       if (startWithNextSegment) {
-        segments.push('');
+        this.segments.push('');
         startWithNextSegment = false;
       }
 
-      const lastIndex = segments.length - 1;
-      segments[lastIndex] += char.toLowerCase();
+      const lastIndex = this.segments.length - 1;
+      this.segments[lastIndex] += char.toLowerCase();
 
       i++;
     }
@@ -265,12 +131,12 @@ export class SearchEngine {
 
     makeObservable<
       typeof this,
-      'cache' | 'rawSearchText' | 'formattedSearchText' | 'setSearchText'
+      'rawSearchText' | 'formattedSearchText' | 'setSearchText'
     >(this, {
       rawSearchText: observable.ref,
       formattedSearchText: observable.ref,
       isActive: computed,
-      cache: computed,
+      segments: observable,
       setSearchText: action.bound,
     });
   }

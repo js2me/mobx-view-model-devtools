@@ -1,12 +1,15 @@
 :root {
     --vmd-base-blur: 2px;
 
-    --vmd-bg: #000000d9;
-    --vmd-overlay-bg: #272727;
+    /* --vmd-bg: #000000d9; */
+    --vmd-bg: #0f111cba;
+    /* --vmd-overlay-bg: #272727; */
+    --vmd-overlay-bg: #0f111c;
 
     --vmd-base-color: #ccc;
     --vmd-control-active-bg: #e6e6e682;
     --vmd-control-active-color: #181818;
+    --vmd-control-active-text-input-color: var(--vmd-base-color);
     --vmd-control-inactive-color: #8b8b8b;
     --vmd-control-border: #5b5468a6;
     --vmd-control-bg: transparent;

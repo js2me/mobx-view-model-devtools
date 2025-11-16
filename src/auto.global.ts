@@ -8,8 +8,12 @@ Object.assign(globalThis, {
 
 ViewModelDevtools.define({
   position: 'top-right',
-  defaultIsOpened: false,
+  defaultIsOpened: buildEnvs.isDev,
 });
+
+if (buildEnvs.isDev) {
+  ViewModelDevtools.connectExtras(window);
+}
 
 viewModelsConfig.hooks.storeCreate.sub((store) => {
   if (ViewModelStoreImpl === store.constructor) {

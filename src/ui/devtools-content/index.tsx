@@ -2,7 +2,6 @@ import { FolderTree, ListUl, Magnifier, Xmark } from '@gravity-ui/icons';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
-import SimpleBar from 'simplebar-react';
 import { Virtualizer } from 'virtua';
 import { cx } from 'yummies/css';
 import type { DevtoolsClientVM } from '@/model';
@@ -14,6 +13,8 @@ import { MetaListItemRender } from './meta-list-item-render';
 import { PropertyListItemRender } from './propert-list-item-render';
 import css from './styles.module.css';
 import { VmTreeItemRender } from './vm-tree-item-render';
+import { ExtraListItem } from '@/model/list-item/extra-list-item';
+import { ExtraTreeItemRender } from './extra-tree-item-render';
 
 export const VmDevtoolsContent = observer(
   ({
@@ -27,9 +28,13 @@ export const VmDevtoolsContent = observer(
     const model = useViewModel<DevtoolsClientVM>();
 
     return (
-      <SimpleBar {...props} className={cx(css.vmContent, className)}>
+      <div
+        {...props}
+        className={cx(css.vmContent, className)}
+        ref={model.contentRef}
+      >
         <header className={css.vmContentHeader}>
-          <div  className={css.gradientBlur} />
+          <div className={css.gradientBlur} />
           <div className={css.vmContentHeaderTitle}>
             <img
               className={css.vmContentHeaderLogo}
@@ -83,6 +88,9 @@ export const VmDevtoolsContent = observer(
               if (listItem instanceof VMListItem) {
                 return <VmTreeItemRender item={listItem} key={listItem.key} />;
               }
+              if (listItem instanceof ExtraListItem) {
+                return <ExtraTreeItemRender item={listItem} key={listItem.key} />;
+              }
               if (listItem instanceof PropertyListItem) {
                 return (
                   <PropertyListItemRender
@@ -101,7 +109,7 @@ export const VmDevtoolsContent = observer(
             }}
           </Virtualizer>
         </div>
-      </SimpleBar>
+      </div>
     );
   },
 );

@@ -1,6 +1,6 @@
 import { ChevronRight } from '@gravity-ui/icons';
 import { cx } from 'yummies/css';
-import css from '@/styles.module.css';
+import css from './styles.module.css';
 
 export const ExpandButton = ({
   expandable,

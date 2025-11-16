@@ -3,9 +3,9 @@ import {
   ViewModelsProvider,
   withViewModel,
 } from 'mobx-view-model';
-import { DevtoolsClientVM } from '@/model';
-import { VmDevtoolsButton } from './devtools-button';
-import { VmDevtoolsPopup } from './devtools-popup';
+import { VmDevtoolsButton } from '../devtools-button';
+import { VmDevtoolsPopup } from '../devtools-popup';
+import { DevtoolsClientVM } from './model';
 
 export const DevtoolsClient = withViewModel(DevtoolsClientVM, ({ model }) => {
   return (

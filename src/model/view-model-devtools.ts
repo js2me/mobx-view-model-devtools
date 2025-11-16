@@ -15,12 +15,13 @@ import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { VirtualizerHandle, VListHandle } from 'virtua';
 import { createRef, type Ref } from 'yummies/mobx';
-import type { AnyObject, Maybe } from 'yummies/types';
+import type { AnyObject, Defined, Maybe } from 'yummies/types';
 import { DevtoolsClient } from '@/ui/devtools-client';
 import css from '../styles.module.css';
 import { KeyboardHandler } from './keyboard-handler';
 import { ViewModelImpl } from './lib/view-model.impl';
 import { ViewModelStoreImpl } from './lib/view-model-store.impl';
+import { ExtraListItem } from './list-item/extra-list-item';
 import type { ListItem } from './list-item/list-item';
 import type { PropertyListItem } from './list-item/property-list-item';
 import { VMListItem } from './list-item/vm-list-item';
@@ -48,6 +49,7 @@ export class ViewModelDevtools {
   keyboardHandler: KeyboardHandler;
   searchEngine: SearchEngine;
   presentationMode: 'tree' | 'list';
+  position: Defined<ViewModelDevtoolsConfig['position']>;
   scrollListRef: Ref<VirtualizerHandle>;
 
   anyCache = observable.map<string, any>();
@@ -73,8 +75,18 @@ export class ViewModelDevtools {
       .map((vm) => new VMListItem(this, vm, this.allVms));
   }
 
+  private get extraListItems() {
+    if (!this.extras) {
+      return [];
+    }
+    return [new ExtraListItem(this, this.extras)];
+  }
+
   get listItems(): ListItem<any>[] {
-    return this.rootVmListItems.flatMap((it) => it.expandedChildrenWithSelf);
+    return [
+      ...this.rootVmListItems.flatMap((it) => it.expandedChildrenWithSelf),
+      ...this.extraListItems.flatMap((it) => it.expandedChildrenWithSelf),
+    ];
   }
 
   get isActive() {
@@ -87,32 +99,6 @@ export class ViewModelDevtools {
 
   isExpanded(vmItem: VMListItem) {
     return vmItem.isExpanded || this.searchEngine.isActive;
-  }
-
-  checkIsVmPathExpanded(vmItem: VMListItem, path: string) {
-    const searchResult = this.searchEngine.getSearchResult({
-      item: vmItem,
-      type: 'vm',
-    });
-
-    if (searchResult.fittedPath.length) {
-      if (searchResult.isFittedById || searchResult.isFittedByName) {
-        if (
-          searchResult.fittedPath
-            .slice(1)
-            .join('.')
-            .startsWith(path.toLowerCase())
-        ) {
-          return true;
-        }
-      } else {
-        if (searchResult.fittedPath.join('.').startsWith(path.toLowerCase())) {
-          return true;
-        }
-      }
-    }
-
-    return this.expandedVmItemsPaths.has(`${vmItem.key}%%%${path}`);
   }
 
   checkIsExtraPathExpanded(path: string) {
@@ -198,6 +184,12 @@ export class ViewModelDevtools {
   }
 
   private init() {
+    if (this.isInitialized) {
+      return;
+    }
+
+    this.isInitialized = true;
+
     reaction(
       () => this.searchEngine.formattedSearchText,
       () => {
@@ -236,6 +228,8 @@ export class ViewModelDevtools {
     );
   }
 
+  private isInitialized = false;
+
   render() {
     let container = document.querySelector(
       `#${this.containerId}`,
@@ -248,17 +242,22 @@ export class ViewModelDevtools {
 
       if (document.body) {
         document.body.appendChild(container);
+        const root = createRoot(container!);
+        root.render(
+          createElement(DevtoolsClient, { payload: { devtools: this } }),
+        );
       } else {
         document.addEventListener('DOMContentLoaded', () => {
           document.body.appendChild(container!);
+          const root = createRoot(container!);
+          root.render(
+            createElement(DevtoolsClient, { payload: { devtools: this } }),
+          );
         });
       }
-
-      this.init();
     }
 
-    const root = createRoot(container);
-    root.render(createElement(DevtoolsClient, { payload: { devtools: this } }));
+    this.init();
   }
 
   private static _instance: ViewModelDevtools | null = null;
@@ -266,6 +265,7 @@ export class ViewModelDevtools {
   private constructor(public config: ViewModelDevtoolsConfig) {
     this.isPopupOpened = !!this.config.defaultIsOpened;
     this.displayType = 'popup';
+    this.position = this.config.position ?? 'top-right';
     this.vmStore = new ViewModelStoreImpl();
     this.setExtras(this.config.extras);
     this.setStore(this.config.viewModels);
@@ -278,22 +278,24 @@ export class ViewModelDevtools {
     this.keyboardHandler = new KeyboardHandler(this);
     this.searchEngine = new SearchEngine();
 
-    makeObservable<typeof this, 'rootVmListItems'>(this, {
+    makeObservable<typeof this, 'rootVmListItems' | 'extraListItems'>(this, {
+      position: observable.ref,
       isPopupOpened: observable.ref,
       projectVmStore: observable.ref,
       presentationMode: observable.ref,
       extras: observable.ref,
-      setStore: action,
-      setExtras: action,
-      showPopup: action,
-      hidePopup: action,
-      handleChangePresentationMode: action,
-      handleExpandVmPropertyClick: action,
-      expandAllVMs: action,
-      collapseAllVms: action,
-      handleExpandExtraPropertyClick: action,
+      setStore: action.bound,
+      setExtras: action.bound,
+      showPopup: action.bound,
+      hidePopup: action.bound,
+      handleChangePresentationMode: action.bound,
+      handleExpandVmPropertyClick: action.bound,
+      expandAllVMs: action.bound,
+      collapseAllVms: action.bound,
+      handleExpandExtraPropertyClick: action.bound,
       isActive: computed,
       rootVmListItems: computed.struct,
+      extraListItems: computed.struct,
     });
 
     this.render();

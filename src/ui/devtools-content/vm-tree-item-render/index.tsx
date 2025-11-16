@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import type { VMListItem } from '@/model/list-item/vm-list-item';
 import css from '@/styles.module.css';
-import { ExpandButton } from '@/ui/expand-button';
+import { ExpandButton } from '@/ui/devtools-content/expand-button';
 
 export const VmTreeItemRender = observer(({ item }: { item: VMListItem }) => {
   return (

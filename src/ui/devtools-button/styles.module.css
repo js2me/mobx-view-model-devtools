@@ -1,0 +1,78 @@
+
+.vmButton {
+  position: fixed;
+  z-index: 999999;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 150ms ease-in-out;
+  cursor: pointer;
+  user-select: none;
+
+  &.dragging {
+    transition: none;
+    cursor: grabbing;
+    opacity: 0.8;
+    z-index: 1000;
+  }
+
+  &.opened {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  &[data-position="top-right"] {
+    top: 12px;
+    right: 12px;
+  }
+
+  &[data-position="top-left"] {
+    top: 12px;
+    left: 12px;
+  }
+
+  &[data-position="bottom-left"] {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  &[data-position="bottom-right"] {
+    bottom: 12px;
+    right: 12px;
+  }
+
+  > img {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+  }
+
+  > div {
+    transition: all 150ms ease-in-out;
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    border: 2px solid #00000057;
+  }
+
+  > span {
+    left: -4px;
+    top: -4px;
+    pointer-events: none;
+    position: absolute;
+    display: flex;
+    border-radius: 8px;
+    background: #005c26cf;
+    padding: 2px;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 12px;
+    color: #2aff0a;
+  }
+
+  &:not(.isConnected) {
+    filter: grayscale(1);
+  }
+}

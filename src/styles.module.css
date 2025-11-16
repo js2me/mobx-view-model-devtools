@@ -2,101 +2,23 @@
 
 .root {
   display: contents;
+  box-sizing: border-box;
 }
 
 .root * {
   font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
-.vmButton {
-  position: fixed;
-  z-index: 999999;
-  width: 36px;
-  height: 36px;
+.root button {
+  outline: none;
+  background: transparent;
+  border: 0;
   cursor: pointer;
-  border-radius: 8px;
-  outline: 0;
-  transition: all 150ms ease-in-out;
-
-  &[data-position="top-right"], &[data-position="undefined"] {
-    top: 12px;
-    right: 12px;
-
-    &.opened {
-      top: -40px;
-    }
-  }
-
-  &[data-position="top-left"] {
-    top: 12px;
-    left: 12px;
-
-    &.opened {
-      top: -40px;
-    }
-  }
-
-  &[data-position="bottom-left"] {
-    bottom: 12px;
-    left: 12px;
-
-    &.opened {
-      bottom: -40px;
-    }
-  }
-
-  &[data-position="bottom-right"] {
-    bottom: 12px;
-    right: 12px;
-
-    &.opened {
-      bottom: -40px;
-    }
-  }
-
-  > img {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    border-radius: 8px;
-  }
-
-  > div {
-    transition: all 150ms ease-in-out;
-    position: absolute;
-    inset: 0;
-    border-radius: 8px;
-    border: 2px solid #00000057;
-  }
-
-  > span {
-    left: -4px;
-    top: -4px;
-    pointer-events: none;
-    position: absolute;
-    display: flex;
-    border-radius: 8px;
-    background: #005c26cf;
-    padding: 2px;
-    font-weight: 600;
-    font-size: 12px;
-    line-height: 12px;
-    color: #2aff0a;
-  }
-
-  &.opened {
-    pointer-events: none;
-  }
-
-  &:not(.isConnected) {
-    filter: grayscale(1);
-  }
-}
-
-.closePopupButton {
-  width: 28px;
-  padding: 6px;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: 0;
 }
 
 .hierarchyButton {
@@ -107,37 +29,6 @@
 
   &.active {
     background: #f0f0f01f;
-  }
-}
-
-.vmPopup {
-  position: fixed !important;
-  z-index: 999999;
-  width: 520px;
-  border-radius: 8px;
-  height: calc(100vh - 24px);
-  width: calc(100vw - 34px);
-  max-width: 520px;
-  box-shadow: 0 5px 20px #00000066;
-
-  &[data-position="top-right"], &[data-position="undefined"] {
-    top: 12px;
-    right: 12px;
-  }
-
-  &[data-position="top-left"] {
-    top: 12px;
-    left: 12px;
-  }
-
-  &[data-position="bottom-left"] {
-    bottom: 12px;
-    left: 12px;
-  }
-
-  &[data-position="bottom-right"] {
-    bottom: 12px;
-    right: 12px;
   }
 }
 
@@ -196,26 +87,8 @@
   }
 }
 
-.extrasItem {
+.extraTreeItem {
   .treeItemLabel {
     background: var(--vmd-secondary-bg);
-  }
-}
-
-.expandButton {
-  color: #a0a0a0;
-  opacity: 1 !important;
-  width: 16px;
-  height: 16px;
-  font-weight: bold;
-  cursor: pointer;
-
-  &.expanded {
-    color: #b8b8b8;
-    transform: rotate(90deg);
-  }
-
-  &.disabled {
-    opacity: 0.35 !important;
   }
 }

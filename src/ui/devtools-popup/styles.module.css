@@ -1,0 +1,39 @@
+.vmPopup {
+  position: fixed !important;
+  z-index: 999999;
+  width: 520px;
+  border-radius: 8px;
+  height: calc(100vh - 24px);
+  width: calc(100vw - 34px);
+  max-width: 520px;
+  box-shadow: 0 5px 20px #00000066;
+
+  &[data-position="top-right"] {
+    top: 12px;
+    right: 12px;
+  }
+
+  &[data-position="top-left"] {
+    top: 12px;
+    left: 12px;
+  }
+
+  &[data-position="bottom-left"] {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  &[data-position="bottom-right"] {
+    bottom: 12px;
+    right: 12px;
+  }
+}
+
+.closePopupButton {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--vmd-base-color);
+}

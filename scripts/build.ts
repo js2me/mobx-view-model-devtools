@@ -28,7 +28,7 @@ const createBundle = async ({
   } else {
     fileName = 'auto.global';
     emptyOutDir = false;
-    libraryFormats = ['es'];
+    libraryFormats = ['umd'];
     sourceEntryFilePath = resolve(configs.rootPath, 'src/auto.global.ts');
   }
 
@@ -169,12 +169,14 @@ const main = async () => {
     configs,
     buildEnvs: {
       version: 'default',
+      isDev: process.env.NODE_ENV === 'development',
     },
   });
   await createBundle({
     configs,
     buildEnvs: {
       version: 'global',
+      isDev: process.env.NODE_ENV === 'development',
     },
   });
 

@@ -1,9 +1,10 @@
 {
   "name": "mobx-view-model-devtools",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "",
   "scripts": {
-    "build:watch": "nodemon --watch src --delay 600ms --ext ts,tsx,css --exec \"pnpm build && pnpm exec http-server dist -p 15000\"",
+    "build:watch": "nodemon --watch src --delay 600ms --ext ts,tsx,css --exec \"pnpm build\"",
+    "build:watch-server": "nodemon --watch src --delay 600ms --ext ts,tsx,css --exec \"pnpm build && pnpm exec http-server dist -p 15000\"",
     "build": "cross-env NODE_ENV=development tsx scripts/build",
     "build:prod": "tsc --noEmit && cross-env NODE_ENV=production tsx scripts/build",
     "lint": "biome check",
@@ -46,7 +47,7 @@
     "mobx-web-api": "^1.9.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "simplebar-react": "^3.3.2",
+    "simplebar": "^6.3.3",
     "virtua": "^0.46.7",
     "yummies": "^6.2.0"
   },

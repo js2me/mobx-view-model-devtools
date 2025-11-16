@@ -1,4 +1,21 @@
 
+.expandButton {
+  color: #a0a0a0;
+  opacity: 1 !important;
+  width: 16px;
+  height: 16px;
+  font-weight: bold;
+  cursor: pointer;
+
+  &.expanded {
+    color: #b8b8b8;
+    transform: rotate(90deg);
+  }
+
+  &.disabled {
+    opacity: 0.35 !important;
+  }
+}
 
 .vmContent[data-simplebar] {
   position: relative;
@@ -303,6 +320,7 @@
 .vmContentInput > input  {
   background: var(--vmd-control-bg);
   border: 1px solid var(--vmd-control-border);
+  color: var(--vmd-control-active-text-input-color);
   border-radius: 4px;
   outline: 0;
   width: 100%;

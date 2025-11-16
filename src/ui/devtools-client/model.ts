@@ -1,8 +1,7 @@
 import SimpleBar from 'simplebar';
 import { createRef } from 'yummies/mobx';
 import type { Maybe } from 'yummies/types';
-import { ViewModelImpl } from './lib/view-model.impl';
-import type { ViewModelDevtools } from './view-model-devtools';
+import { type ViewModelDevtools, ViewModelImpl } from '@/model';
 
 export class DevtoolsClientVM extends ViewModelImpl<{
   devtools: ViewModelDevtools;
