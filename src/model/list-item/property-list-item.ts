@@ -72,6 +72,18 @@ export class PropertyListItem extends ListItem<any> {
       return arrayChildItems;
     }
 
+    if (this.type === 'function') {
+      return Object.keys(this.data).map((property, order) => {
+        return PropertyListItem.create(
+          this.devtools,
+          property,
+          `${this.path}.${property}`,
+          order,
+          this,
+        );
+      })
+    }
+
     if (this.type === 'instance' || this.type === 'object') {
       return getAllKeys(this.data).map((property, order) => {
         return PropertyListItem.create(

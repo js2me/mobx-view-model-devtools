@@ -2,9 +2,10 @@
     --vmd-base-blur: 2px;
 
     /* --vmd-bg: #000000d9; */
-    --vmd-bg: #0f111cba;
     /* --vmd-overlay-bg: #272727; */
-    --vmd-overlay-bg: #0f111c;
+
+    --vmd-bg: #0f111cdb;
+    --vmd-overlay-bg: #0e1227bd;
 
     --vmd-base-color: #ccc;
     --vmd-control-active-bg: #e6e6e682;

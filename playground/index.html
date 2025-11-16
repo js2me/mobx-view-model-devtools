@@ -30,6 +30,18 @@
     </script>
   </head>
   <body>
+    <button id="change-color">change color</button>
+    <script>
+      document.getElementById("change-color").addEventListener("click", () => {
+        if (
+          document.documentElement.style.background === "rgb(255, 255, 255)"
+        ) {
+          document.documentElement.style.background = "rgb(35, 35, 35)";
+        } else {
+          document.documentElement.style.background = "rgb(255, 255, 255)";
+        }
+      });
+    </script>
     <script type="module">
       import { ViewModelStore } from "mobx-view-model";
       console.log("ViewModelStore", ViewModelStore);
