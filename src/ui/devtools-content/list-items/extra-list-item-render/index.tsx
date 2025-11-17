@@ -5,7 +5,7 @@ import type { ExtraListItem } from '@/model/list-item/extra-list-item';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/devtools-content/expand-button';
 
-export const ExtraTreeItemRender = observer(
+export const ExtraListItemRender = observer(
   ({ item }: { item: ExtraListItem }) => {
     return (
       <div
@@ -14,9 +14,7 @@ export const ExtraTreeItemRender = observer(
         data-depth={item.depthLine}
         style={{ '--level': item.depth } as CSSProperties}
       >
-        <header
-          className={css.treeItemHeader}
-        >
+        <header className={css.treeItemHeader}>
           <ExpandButton
             showIconAnyway={item.devtools.presentationMode === 'tree'}
             expandable={item.isExpandable}

@@ -73,6 +73,10 @@
   z-index: 1;
 }
 
+.treeItem:hover {
+  background: var(--vmd-content-highlight-bg);
+}
+
 .treeItem:not([data-fitted='true']) > header {
   opacity: 0.6;
 }

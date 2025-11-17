@@ -1,9 +1,9 @@
 import { Xmark } from '@gravity-ui/icons';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
-import type { DevtoolsClientVM } from '@/model';
-import css from './styles.module.css';
+import type { DevtoolsClientVM } from '../devtools-client/model';
 import { VmDevtoolsContent } from '../devtools-content';
+import css from './styles.module.css';
 
 export const VmDevtoolsPopup = observer(() => {
   const model = useViewModel<DevtoolsClientVM>();

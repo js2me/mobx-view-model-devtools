@@ -4,7 +4,7 @@
     /* --vmd-bg: #000000d9; */
     /* --vmd-overlay-bg: #272727; */
 
-    --vmd-bg: #0f111cdb;
+    --vmd-bg: #0c0a19e6;
     --vmd-overlay-bg: #0e1227bd;
 
     --vmd-base-color: #ccc;
@@ -16,6 +16,7 @@
     --vmd-control-bg: transparent;
     --vmd-bg-transparent: #1f1c2600;
     --vmd-content-bg: transparent;
+    --vmd-content-highlight-bg: #ffffff0a;
     --vmd-scrollbar-track-size: 8px;
     --vmd-scrollbar-bg-base: #81818170;
     --vmd-scrollbar-bg-active: #818181;

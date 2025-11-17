@@ -1,4 +1,5 @@
 import { action, computed, makeObservable } from 'mobx';
+import { type ComponentType } from 'react';
 import type { ViewModelDevtools } from '../view-model-devtools';
 
 export type ListItemViewProps<T extends ListItem<any>> = { item: T };
@@ -77,6 +78,18 @@ export abstract class ListItem<T> {
     return String().padEnd(this.depth, '-');
   }
 
+  get stringifiedData() {
+    return String(this.data);
+  }
+
+  get operations(): {
+    title: string;
+    icon: ComponentType;
+    action: VoidFunction;
+  }[] {
+    return [];
+  }
+
   expandKey;
 
   constructor(
@@ -93,9 +106,11 @@ export abstract class ListItem<T> {
     computed(this, 'totalChildCount');
     computed(this, 'depthLine');
     computed(this, 'depth');
+    computed(this, 'stringifiedData');
+    computed.struct(this, 'operations');
     computed.struct(this, 'children');
     computed.struct(this, 'expandedChildren');
-    computed.struct(this, 'expandedChildrenWithSelf')
+    computed.struct(this, 'expandedChildrenWithSelf');
     computed(this, 'data');
     computed(this, 'isExpandable');
     action(this, 'expand');

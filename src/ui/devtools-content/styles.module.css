@@ -360,7 +360,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% + 12px);
+  height: calc(100% + 6px);
   pointer-events: none;
   
   /* Основной черный градиент */
@@ -376,8 +376,8 @@
   position: absolute;
   inset: 0;
   background: transparent;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   
   /* Маска для постепенного размытия */
   -webkit-mask: linear-gradient(

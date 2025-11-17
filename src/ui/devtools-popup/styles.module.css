@@ -36,4 +36,7 @@
   border: 0;
   background: transparent;
   color: var(--vmd-base-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

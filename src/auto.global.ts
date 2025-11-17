@@ -20,5 +20,9 @@ viewModelsConfig.hooks.storeCreate.sub((store) => {
     return;
   }
 
-  ViewModelDevtools.connect(store as any);
+  if (buildEnvs.isDev) {
+    ViewModelDevtools.connect(store as any, window);
+  } else {
+    ViewModelDevtools.connect(store as any);
+  }
 });

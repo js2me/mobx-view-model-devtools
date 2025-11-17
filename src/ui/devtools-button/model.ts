@@ -2,7 +2,8 @@ import { runInAction } from 'mobx';
 import { ViewModelBase } from 'mobx-view-model';
 import { createRef } from 'yummies/mobx';
 import type { Defined } from 'yummies/types';
-import type { DevtoolsClientVM, ViewModelDevtoolsConfig } from '@/model';
+import type { ViewModelDevtoolsConfig } from '@/model';
+import type { DevtoolsClientVM } from '../devtools-client/model';
 import css from './styles.module.css';
 
 export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {

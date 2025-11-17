@@ -1,4 +1,5 @@
-import { computed, makeObservable } from 'mobx';
+import { Copy } from '@gravity-ui/icons';
+import { computed, makeObservable, observable, runInAction } from 'mobx';
 import { typeGuard } from 'yummies/type-guard';
 import type { Maybe } from 'yummies/types';
 import { getAllKeys } from '../utils/get-all-keys';
@@ -81,7 +82,7 @@ export class PropertyListItem extends ListItem<any> {
           order,
           this,
         );
-      })
+      });
     }
 
     if (this.type === 'instance' || this.type === 'object') {
@@ -189,6 +190,52 @@ export class PropertyListItem extends ListItem<any> {
     };
   }
 
+  private failedStringify = false;
+
+  get isCopiable() {
+    return this.type !== 'instance' && !this.failedStringify;
+  }
+
+  get stringifiedData() {
+    switch (this.type) {
+      case 'object':
+      case 'array': {
+        try {
+          return JSON.stringify(this.data, null, 2);
+        } catch (_) {
+          runInAction(() => {
+            this.failedStringify = true;
+          });
+          return super.stringifiedData;
+        }
+      }
+      default: {
+        switch (this.dataType) {
+          case 'symbol':
+            return `Symbol(${Symbol.keyFor(this.data) || ''})`;
+          case 'string':
+            return `"${super.stringifiedData}"`;
+        }
+
+        return super.stringifiedData;
+      }
+    }
+  }
+
+  get operations() {
+    if (this.isCopiable) {
+      return [
+        {
+          title: 'Copy',
+          icon: Copy,
+          action: () => navigator.clipboard.writeText(this.stringifiedData),
+        },
+      ];
+    }
+
+    return [];
+  }
+
   protected constructor(
     devtools: ViewModelDevtools,
     public property: Maybe<string>,
@@ -204,6 +251,7 @@ export class PropertyListItem extends ListItem<any> {
     computed(this, 'dataType');
     computed(this, 'stringifiedDataType');
     computed(this, 'extraContent');
+    observable.ref(this, 'failedStringify');
     makeObservable(this);
   }
 

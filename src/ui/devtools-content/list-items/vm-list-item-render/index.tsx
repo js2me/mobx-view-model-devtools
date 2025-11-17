@@ -5,7 +5,7 @@ import type { VMListItem } from '@/model/list-item/vm-list-item';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/devtools-content/expand-button';
 
-export const VmTreeItemRender = observer(({ item }: { item: VMListItem }) => {
+export const VmListItemRender = observer(({ item }: { item: VMListItem }) => {
   return (
     <div
       className={cx(css.treeItem, css.vmTreeItem)}

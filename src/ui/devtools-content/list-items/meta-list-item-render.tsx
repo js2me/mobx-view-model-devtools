@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import type { CSSProperties } from 'react';
 import { cx } from 'yummies/css';
 import type { MetaListItem } from '@/model/list-item/meta-list-item';
-import css from './propert-list-item-render/styles.module.css';
+import css from './property-list-item-render/styles.module.css';
 
 export const MetaListItemRender = observer(
   ({ item }: { item: MetaListItem }) => {
@@ -11,7 +11,7 @@ export const MetaListItemRender = observer(
         className={cx(css.property, css.primitive)}
         style={{ '--level': item.depth } as CSSProperties}
         data-fitted={item.isFitted}
-        title={String(item.data)}
+        title={item.stringifiedData}
         data-depth={item.depthLine}
       >
         {item.content}

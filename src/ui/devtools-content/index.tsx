@@ -4,17 +4,17 @@ import { useViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
 import { Virtualizer } from 'virtua';
 import { cx } from 'yummies/css';
-import type { DevtoolsClientVM } from '@/model';
+import { ExtraListItem } from '@/model/list-item/extra-list-item';
 import { MetaListItem } from '@/model/list-item/meta-list-item';
 import { PropertyListItem } from '@/model/list-item/property-list-item';
 import { VMListItem } from '@/model/list-item/vm-list-item';
+import type { DevtoolsClientVM } from '../devtools-client/model';
 import { IconToggleButton } from '../shared/icon-toggle-button';
-import { MetaListItemRender } from './meta-list-item-render';
-import { PropertyListItemRender } from './propert-list-item-render';
+import { ExtraListItemRender } from './list-items/extra-list-item-render';
+import { MetaListItemRender } from './list-items/meta-list-item-render';
+import { PropertyListItemRender } from './list-items/property-list-item-render';
+import { VmListItemRender } from './list-items/vm-list-item-render';
 import css from './styles.module.css';
-import { VmTreeItemRender } from './vm-tree-item-render';
-import { ExtraListItem } from '@/model/list-item/extra-list-item';
-import { ExtraTreeItemRender } from './extra-tree-item-render';
 
 export const VmDevtoolsContent = observer(
   ({
@@ -86,10 +86,12 @@ export const VmDevtoolsContent = observer(
           >
             {(listItem) => {
               if (listItem instanceof VMListItem) {
-                return <VmTreeItemRender item={listItem} key={listItem.key} />;
+                return <VmListItemRender item={listItem} key={listItem.key} />;
               }
               if (listItem instanceof ExtraListItem) {
-                return <ExtraTreeItemRender item={listItem} key={listItem.key} />;
+                return (
+                  <ExtraListItemRender item={listItem} key={listItem.key} />
+                );
               }
               if (listItem instanceof PropertyListItem) {
                 return (
