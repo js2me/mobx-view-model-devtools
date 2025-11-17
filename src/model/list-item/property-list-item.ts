@@ -49,8 +49,10 @@ export class PropertyListItem extends ListItem<any> {
   }
 
   get children(): PropertyListItem[] {
+    let listItems: PropertyListItem[] = [];
+
     if (this.type === 'array') {
-      const arrayChildItems = Object.keys(this.data).map((property, order) =>
+      listItems = Object.keys(this.data).map((property, order) =>
         PropertyListItem.create(
           this.devtools,
           property,
@@ -60,21 +62,17 @@ export class PropertyListItem extends ListItem<any> {
         ),
       );
 
-      arrayChildItems.push(
+      listItems.push(
         PropertyListItem.create(
           this.devtools,
           'length',
           `${this.path}.length`,
-          arrayChildItems.length,
+          listItems.length,
           this,
         ),
       );
-
-      return arrayChildItems;
-    }
-
-    if (this.type === 'function') {
-      return Object.keys(this.data).map((property, order) => {
+    } else if (this.type === 'function') {
+      listItems = Object.keys(this.data).map((property, order) => {
         return PropertyListItem.create(
           this.devtools,
           property,
@@ -83,9 +81,7 @@ export class PropertyListItem extends ListItem<any> {
           this,
         );
       });
-    }
-
-    if (this.type === 'instance' || this.type === 'object') {
+    } else if (this.type === 'instance' || this.type === 'object') {
       return getAllKeys(this.data).map((property, order) => {
         return PropertyListItem.create(
           this.devtools,
@@ -97,7 +93,19 @@ export class PropertyListItem extends ListItem<any> {
       });
     }
 
-    return [];
+    if (this.devtools.sortPropertiesBy !== 'none') {
+      listItems = listItems.sort((a, b) => {
+        const aProperty = String(a.property);
+        const bProperty = String(b.property);
+
+        if (this.devtools.sortPropertiesBy === 'asc') {
+          return aProperty.localeCompare(bProperty);
+        }
+        return bProperty.localeCompare(aProperty);
+      });
+    }
+
+    return listItems;
   }
 
   get isFitted() {

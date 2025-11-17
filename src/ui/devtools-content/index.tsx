@@ -1,4 +1,12 @@
-import { FolderTree, ListUl, Magnifier, Xmark } from '@gravity-ui/icons';
+import {
+  BarsAscendingAlignLeftArrowDown,
+  BarsDescendingAlignCenter,
+  BarsDescendingAlignLeftArrowUp,
+  FolderTree,
+  ListUl,
+  Magnifier,
+  Xmark,
+} from '@gravity-ui/icons';
 import { observer } from 'mobx-react-lite';
 import { useViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
@@ -60,6 +68,24 @@ export const VmDevtoolsContent = observer(
                   },
                 ]}
                 value={model.devtools.presentationMode}
+              />
+              <IconToggleButton
+                onUpdate={model.devtools.handleSortPropertiesChange}
+                options={[
+                  {
+                    value: 'none',
+                    icon: BarsDescendingAlignCenter,
+                  },
+                  {
+                    value: 'asc',
+                    icon: BarsAscendingAlignLeftArrowDown,
+                  },
+                  {
+                    value: 'desc',
+                    icon: BarsDescendingAlignLeftArrowUp,
+                  },
+                ]}
+                value={model.devtools.sortPropertiesBy}
               />
             </div>
             <div

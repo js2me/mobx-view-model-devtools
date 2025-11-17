@@ -41,7 +41,18 @@ export class VMListItem extends ListItem<AnyVM> {
   }
 
   private get propertyListItems(): PropertyListItem[] {
-    return getAllKeys(this.data).map((property, order) => {
+    let keys = getAllKeys(this.data);
+
+    if (this.devtools.sortPropertiesBy !== 'none') {
+      keys = keys.sort((a,b ) => {
+        if (this.devtools.sortPropertiesBy === 'asc') {
+          return a.localeCompare(b);
+        }
+        return b.localeCompare(a);
+      });
+    }
+
+    return keys.map((property, order) => {
       return PropertyListItem.create(
         this.devtools,
         property,

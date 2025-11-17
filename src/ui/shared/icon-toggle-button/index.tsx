@@ -26,23 +26,24 @@ export const IconToggleButton = ({
     }
 
     optionNodes.push(
-      <div className={cx(css.option, {
-        [css.active]: isActive
-      })} key={i}>
+      <div
+        className={cx(css.option, {
+          [css.active]: isActive,
+        })}
+        key={i}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onUpdate(options[i].value);
+        }}
+      >
         <Icon />
       </div>,
     );
   });
 
   return (
-    <button
-      className={cx(css.iconToggleButton, className)}
-      onClick={() => {
-        const nextOption =
-          (activeIndex !== undefined && options[activeIndex + 1]) || options[0];
-        onUpdate(nextOption.value);
-      }}
-    >
+    <button className={cx(css.iconToggleButton, className)}>
       <div
         className={css.activePosition}
         style={{ '--index': activeIndex } as CSSProperties}

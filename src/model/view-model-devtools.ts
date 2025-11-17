@@ -49,6 +49,7 @@ export class ViewModelDevtools {
   keyboardHandler: KeyboardHandler;
   searchEngine: SearchEngine;
   presentationMode: 'tree' | 'list';
+  sortPropertiesBy: 'asc' | 'desc' | 'none';
   position: Defined<ViewModelDevtoolsConfig['position']>;
   scrollListRef: Ref<VirtualizerHandle>;
 
@@ -164,6 +165,10 @@ export class ViewModelDevtools {
     // this.expandedVmsMap.clear();
   };
 
+  handleSortPropertiesChange = (sortBy: string) => {
+    this.sortPropertiesBy = sortBy as any;
+  };
+
   expandAllVMs() {
     // this.expandedVmsMap.replace(
     //   this.vmsData.flatten.map((it) => [it.key, true] as const),
@@ -270,6 +275,7 @@ export class ViewModelDevtools {
     this.setExtras(this.config.extras);
     this.setStore(this.config.viewModels);
     this.presentationMode = 'tree';
+    this.sortPropertiesBy = 'none';
     this.expandedVmItemsPaths = observable.set<string>();
     this.logoUrl =
       'data:image/png;base64,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';
@@ -283,12 +289,14 @@ export class ViewModelDevtools {
       isPopupOpened: observable.ref,
       projectVmStore: observable.ref,
       presentationMode: observable.ref,
+      sortPropertiesBy: observable.ref,
       extras: observable.ref,
       setStore: action.bound,
       setExtras: action.bound,
       showPopup: action.bound,
       hidePopup: action.bound,
       handleChangePresentationMode: action.bound,
+      handleSortPropertiesChange: action.bound,
       handleExpandVmPropertyClick: action.bound,
       expandAllVMs: action.bound,
       collapseAllVms: action.bound,
