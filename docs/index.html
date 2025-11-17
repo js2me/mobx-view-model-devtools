@@ -6,29 +6,6 @@
     <title>Document</title>
     <script src="https://unpkg.com/mobx-view-model-devtools/auto.global.js"></script>
     <script src="../dist/auto.global.js"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://unpkg.com/react@18/cjs/react.development.js",
-          "react/jsx-runtime": "https://unpkg.com/react@18/umd/react.development.js",
-          "react-dom": "https://unpkg.com/react-dom@18/umd/react-dom.development.js",
-          "mobx": "https://unpkg.com/mobx@6/dist/mobx.esm.production.min.js",
-          "mobx-react-lite": "https://unpkg.com/mobx-react-lite@3/dist/mobxreactlite.umd.development.js",
-          "yummies/complex": "https://unpkg.com/yummies/complex.js",
-          "yummies/mobx": "https://unpkg.com/yummies/mobx.js",
-          "react-simple-loadable": "https://unpkg.com/react-simple-loadable@^3.0.0/index.js",
-          "yummies/imports": "https://unpkg.com/yummies/imports.js",
-          "yummies/data": "https://unpkg.com/yummies/data.js",
-          "yummies/type-guard": "https://unpkg.com/yummies/type-guard.js",
-          "yummies/async": "https://unpkg.com/yummies/async.js",
-          "yummies/html": "https://unpkg.com/yummies/html.js",
-          "yummies/media": "https://unpkg.com/yummies/media.js",
-          "yummies/math": "https://unpkg.com/yummies/math.js",
-          "dompurify": "https://unpkg.com/dompurify/dist/purify.min.js",
-          "mobx-view-model": "https://unpkg.com/mobx-view-model/index.js"
-        }
-      }
-    </script>
   </head>
   <body>
     <button id="change-color">change color</button>
@@ -42,10 +19,6 @@
           document.documentElement.style.background = "rgb(255, 255, 255)";
         }
       });
-    </script>
-    <script type="module">
-      import { ViewModelStore } from "mobx-view-model";
-      console.log("ViewModelStore", ViewModelStore);
     </script>
   </body>
 </html>

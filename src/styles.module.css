@@ -19,6 +19,7 @@
   margin: 0;
   padding-block: 0;
   padding-inline: 0;
+  color: var(--vmd-base-color);
 }
 
 .hierarchyButton {
