@@ -29,3 +29,5 @@ if (lastCreatedStore) {
   connectStore(lastCreatedStore);
 }
 viewModelsConfig.hooks.storeCreate.sub(connectStore);
+
+console.log('auto.global script loaded')
