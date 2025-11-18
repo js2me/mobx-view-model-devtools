@@ -16,12 +16,16 @@ if (buildEnvs.isDev) {
 }
 
 const connectStore = (store: any) => {
+  console.log('connectStore', store, ViewModelStoreImpl === store.constructor);
+
   if (ViewModelStoreImpl === store.constructor) {
     return;
   }
 
   ViewModelDevtools.connect(store as any);
 };
+
+console.log('init', viewModelsConfig.hooks.storeCreate.lastPub?.[0]);
 
 if (viewModelsConfig.hooks.storeCreate.lastPub?.[0]) {
   connectStore(viewModelsConfig.hooks.storeCreate.lastPub[0]);

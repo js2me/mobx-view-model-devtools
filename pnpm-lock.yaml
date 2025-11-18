@@ -21,8 +21,8 @@ importers:
         specifier: ^1.12.0
         version: 1.12.0(mobx@6.15.0)(react@18.3.1)
       mobx-view-model:
-        specifier: ^8.8.1
-        version: 8.8.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^8.9.1
+        version: 8.9.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       mobx-web-api:
         specifier: ^1.9.1
         version: 1.9.1(mobx@6.15.0)(react@18.3.1)
@@ -2787,13 +2787,20 @@ packages:
     peerDependencies:
       mobx: ^6.12.4
 
-  mobx-view-model@8.8.1:
-    resolution: {integrity: sha512-yn39bJoQJRMIYLfl2Unbgkz4xINPJcTbuRANEkoDWWfcowPgdbtut+UkX2hsnpvXQgRE5BPujxhBsA/RJXmCvg==}
+  mobx-view-model@8.9.1:
+    resolution: {integrity: sha512-RQzHzHhdEL8rYGvvWPDL2yVP2y8beUncfLjV/e2W5RNkOG01FWzMgO13WzNZ6g98nxoZKQWfO+RpTD4jISu4PA==}
     peerDependencies:
       mobx: ^6.12.4
       mobx-react-lite: ^4.0.7
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      mobx-react-lite:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   mobx-web-api@1.9.1:
     resolution: {integrity: sha512-R2j043Tov039cJvRxk5P/i1uzrzaiOjfLOMKesDlATg1q+M+YGp6y2QffTlo6RtAZJTnSKpqWR/KAc8CpJe2sA==}
@@ -6763,14 +6770,15 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  mobx-view-model@8.8.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  mobx-view-model@8.9.1(mobx-react-lite@4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       mobx: 6.15.0
+      react-simple-loadable: 2.3.9(react@18.3.1)
+      yummies: 6.3.1(mobx@6.15.0)(react@18.3.1)
+    optionalDependencies:
       mobx-react-lite: 4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-simple-loadable: 2.3.9(react@18.3.1)
-      yummies: 6.3.1(mobx@6.15.0)(react@18.3.1)
 
   mobx-web-api@1.9.1(mobx@6.15.0)(react@18.3.1):
     dependencies:
