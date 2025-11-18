@@ -8,7 +8,7 @@ Object.assign(globalThis, {
 
 ViewModelDevtools.define({
   position: 'top-right',
-  defaultIsOpened: buildEnvs.isDev,
+  defaultIsOpened: false,
 });
 
 if (buildEnvs.isDev) {

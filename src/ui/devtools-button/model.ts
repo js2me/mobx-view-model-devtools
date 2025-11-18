@@ -2,7 +2,7 @@ import { runInAction } from 'mobx';
 import { Storage } from 'mobx-swiss-knife';
 import { ViewModelBase } from 'mobx-view-model';
 import { createRef } from 'yummies/mobx';
-import type { Defined } from 'yummies/types';
+import type { Defined, Maybe } from 'yummies/types';
 import type { ViewModelDevtoolsConfig } from '@/model';
 import type { DevtoolsClientVM } from '../devtools-client/model';
 import css from './styles.module.css';
@@ -16,6 +16,8 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
     type: 'local',
   });
 
+  private rect: Maybe<DOMRect> = null;
+
   ref = createRef<HTMLButtonElement>({
     onSet: (node) => {
       const dragState = {
@@ -27,15 +29,14 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
         startY: 0,
       };
 
-      const savedLeft = this.storage.get({ key: 'left' });
-      const savedTop = this.storage.get({ key: 'top' });
+      const savedLeft = this.storage.get({ key: 'left', fallback: '' });
+      const savedTop = this.storage.get({ key: 'top', fallback: '' });
 
       if (savedLeft && savedTop) {
-        node.style.left = `${savedLeft}`;
-        node.style.top = `${savedTop}`;
+        const { x, y } = this.fixPosition(savedLeft, savedTop);
+        node.style.left = `${x}px`;
+        node.style.top = `${y}px`;
       }
-
-      const { width, height } = node.getBoundingClientRect();
 
       node.addEventListener('mousedown', (e: MouseEvent) => {
         dragState.isDragging = true;
@@ -53,25 +54,10 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
       const handleMouseMove = (e: MouseEvent) => {
         if (!dragState.isDragging) return;
 
-        let x = e.clientX + dragState.offsetX;
-        let y = e.clientY + dragState.offsetY;
-        const minX = 12;
-        const minY = 12;
-        const maxX = window.innerWidth - width - 12;
-        const maxY = window.innerHeight - height - 12;
-
-        if (x < minX) {
-          x = minX;
-        }
-        if (y < minY) {
-          y = minY;
-        }
-        if (x > maxX) {
-          x = maxX;
-        }
-        if (y > maxY) {
-          y = maxY;
-        }
+        const { x, y } = this.fixPosition(
+          e.clientX + dragState.offsetX,
+          e.clientY + dragState.offsetY,
+        );
 
         node.style.left = `${x}px`;
         node.style.top = `${y}px`;
@@ -118,16 +104,62 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
   };
 
   private get position(): Defined<ViewModelDevtoolsConfig['position']> {
-    const rect = this.ref.current?.getBoundingClientRect();
+    const { left, top } = this.offsets;
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
-    const isLeft = (rect?.left ?? 0) < centerX;
-    const isTop = (rect?.top ?? 0) < centerY;
+    const isLeft = left < centerX;
+    const isTop = top < centerY;
 
     if (isTop && isLeft) return 'top-left';
     if (isTop && !isLeft) return 'top-right';
     if (!isTop && isLeft) return 'bottom-left';
+
     return 'bottom-right';
+  }
+
+  private get offsets() {
+    this.rect = this.ref.current?.getBoundingClientRect();
+
+    return {
+      left: this.rect?.left ?? 0,
+      top: this.rect?.top ?? 0,
+    };
+  }
+
+  private get size() {
+    if (!this.rect && this.ref.current) {
+      this.rect = this.ref.current.getBoundingClientRect();
+    }
+
+    return {
+      width: this.rect?.width ?? 0,
+      height: this.rect?.height ?? 0,
+    };
+  }
+
+  private fixPosition(rawX: number | string, rawY: number | string) {
+    const minX = 12;
+    const minY = 12;
+    const maxX = window.innerWidth - this.size.width - 12;
+    const maxY = window.innerHeight - this.size.height - 12;
+
+    let x = typeof rawX === 'string' ? +rawX.replace('px', '') || 0 : rawX;
+    let y = typeof rawY === 'string' ? +rawY.replace('px', '') || 0 : rawY;
+
+    if (x < minX) {
+      x = minX;
+    }
+    if (y < minY) {
+      y = minY;
+    }
+    if (x > maxX) {
+      x = maxX;
+    }
+    if (y > maxY) {
+      y = maxY;
+    }
+
+    return { x, y };
   }
 }
