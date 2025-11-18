@@ -49,7 +49,7 @@
     "react-dom": "^18.3.1",
     "simplebar": "^6.3.3",
     "virtua": "^0.46.7",
-    "yummies": "^6.2.0"
+    "yummies": "^6.3.1"
   },
   "peerDependencies": {
     "mobx-view-model": "^8.8.1"

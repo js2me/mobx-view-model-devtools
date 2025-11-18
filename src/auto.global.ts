@@ -15,14 +15,15 @@ if (buildEnvs.isDev) {
   ViewModelDevtools.connectExtras(window);
 }
 
-viewModelsConfig.hooks.storeCreate.sub((store) => {
+const connectStore = (store: any) => {
   if (ViewModelStoreImpl === store.constructor) {
     return;
   }
 
-  if (buildEnvs.isDev) {
-    ViewModelDevtools.connect(store as any);
-  } else {
-    ViewModelDevtools.connect(store as any);
-  }
-});
+  ViewModelDevtools.connect(store as any);
+};
+
+if (viewModelsConfig.hooks.storeCreate.lastPub?.[0]) {
+  connectStore(viewModelsConfig.hooks.storeCreate.lastPub[0]);
+}
+viewModelsConfig.hooks.storeCreate.sub(connectStore);
