@@ -290,6 +290,12 @@
   flex-direction: row;
   z-index: 1;
   gap: 4px;
+  overflow: hidden;
+  padding-right: 6px;
+}
+
+.vmContentControlPanel:has(.vmContentInput input:focus) > .vmContentControlPanelActions {
+  margin-left: -106px;
 }
 
 .vmContentControlPanelActions {
@@ -297,6 +303,7 @@
   flex-direction: row;
   align-items: center;
   gap: 6px;
+  transition: all 150ms ease;
 }
 
 .hiearchyToggleButton {
@@ -307,6 +314,7 @@
   display: flex;
   position: relative;
   flex: 1;
+  backdrop-filter: blur(var(--vmd-control-blur));
 }
 
 .vmContentInput > svg {
@@ -328,6 +336,10 @@
   padding: 3px 26px;
   font-size: 14px;
   text-overflow: ellipsis;
+
+  &::placeholder {
+    color: var(--vmd-control-active-text-input-placeholder-color);
+  }
 }
 
 .vmContentInput > button {

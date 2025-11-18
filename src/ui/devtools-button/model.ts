@@ -1,4 +1,5 @@
 import { runInAction } from 'mobx';
+import { Storage } from 'mobx-swiss-knife';
 import { ViewModelBase } from 'mobx-view-model';
 import { createRef } from 'yummies/mobx';
 import type { Defined } from 'yummies/types';
@@ -8,6 +9,12 @@ import css from './styles.module.css';
 
 export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
   devtools = this.parentViewModel.devtools;
+
+  private storage = new Storage({
+    namespace: 'mobx-view-model-devtools',
+    prefix: 'devtools-button',
+    type: 'local',
+  });
 
   ref = createRef<HTMLButtonElement>({
     onSet: (node) => {
@@ -19,6 +26,14 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
         startX: 0,
         startY: 0,
       };
+
+      const savedLeft = this.storage.get({ key: 'left' });
+      const savedTop = this.storage.get({ key: 'top' });
+
+      if (savedLeft && savedTop) {
+        node.style.left = `${savedLeft}`;
+        node.style.top = `${savedTop}`;
+      }
 
       const { width, height } = node.getBoundingClientRect();
 
@@ -73,6 +88,8 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
         if (this.position !== this.devtools.position) {
           runInAction(() => {
             this.devtools.position = this.position;
+            this.storage.set({ key: 'left', value: node.style.left });
+            this.storage.set({ key: 'top', value: node.style.top });
           });
         }
       };

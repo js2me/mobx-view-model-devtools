@@ -5,6 +5,8 @@
   position: relative;
   height: 20px;
   outline: none;
+  border-radius: 4px;
+  backdrop-filter: blur(var(--vmd-control-blur));
 }
 
 .activePosition {

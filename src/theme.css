@@ -11,9 +11,11 @@
     --vmd-control-active-bg: #e6e6e682;
     --vmd-control-active-color: #181818;
     --vmd-control-active-text-input-color: var(--vmd-base-color);
+    --vmd-control-active-text-input-placeholder-color: #a3a3a3;
     --vmd-control-inactive-color: #8b8b8b;
     --vmd-control-border: #5b5468a6;
     --vmd-control-bg: transparent;
+    --vmd-control-blur: 2px;
     --vmd-bg-transparent: #1f1c2600;
     --vmd-content-bg: transparent;
     --vmd-content-highlight-bg: #ffffff0a;
