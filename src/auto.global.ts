@@ -6,6 +6,8 @@ Object.assign(globalThis, {
   ViewModelDevtools,
 });
 
+const lastCreatedStore = viewModelsConfig.hooks.storeCreate.lastPub?.[0];
+
 ViewModelDevtools.define({
   position: 'top-right',
   defaultIsOpened: false,
@@ -16,8 +18,6 @@ if (buildEnvs.isDev) {
 }
 
 const connectStore = (store: any) => {
-  console.log('connectStore', store, ViewModelStoreImpl === store.constructor);
-
   if (ViewModelStoreImpl === store.constructor) {
     return;
   }
@@ -25,9 +25,7 @@ const connectStore = (store: any) => {
   ViewModelDevtools.connect(store as any);
 };
 
-console.log('init', viewModelsConfig.hooks.storeCreate.lastPub?.[0]);
-
-if (viewModelsConfig.hooks.storeCreate.lastPub?.[0]) {
-  connectStore(viewModelsConfig.hooks.storeCreate.lastPub[0]);
+if (lastCreatedStore) {
+  connectStore(lastCreatedStore);
 }
 viewModelsConfig.hooks.storeCreate.sub(connectStore);
