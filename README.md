@@ -4,6 +4,7 @@
 Test:  
 ```html
 <script
+  async
   crossOrigin="anonymous"
   src="//unpkg.com/mobx-view-model-devtools/auto.global.js"
 ></script>
