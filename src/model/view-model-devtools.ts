@@ -56,7 +56,7 @@ export class ViewModelDevtools {
 
   private storage = new Storage({
     namespace: 'mobx-view-model-devtools',
-    type: 'local',
+    type: 'session',
   });
 
   anyCache = observable.map<string, any>();
