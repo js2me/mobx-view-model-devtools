@@ -1,3 +1,4 @@
+import { clamp } from 'lodash-es';
 import { runInAction } from 'mobx';
 import { Storage } from 'mobx-swiss-knife';
 import { ViewModelBase } from 'mobx-view-model';
@@ -32,11 +33,9 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
       const savedLeft = this.storage.get({ key: 'left', fallback: '' });
       const savedTop = this.storage.get({ key: 'top', fallback: '' });
 
-      if (savedLeft && savedTop) {
-        const { x, y } = this.fixPosition(savedLeft, savedTop);
-        node.style.left = `${x}px`;
-        node.style.top = `${y}px`;
-      }
+      const { x, y } = this.fixPosition(savedLeft, savedTop);
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
 
       node.addEventListener('mousedown', (e: MouseEvent) => {
         dragState.isDragging = true;
@@ -138,28 +137,18 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
     };
   }
 
-  private fixPosition(rawX: number | string, rawY: number | string) {
+  private fixPosition(
+    rawX: Maybe<number | string>,
+    rawY: Maybe<number | string>,
+  ) {
     const minX = 12;
     const minY = 12;
     const maxX = window.innerWidth - this.size.width - 12;
     const maxY = window.innerHeight - this.size.height - 12;
 
-    let x = typeof rawX === 'string' ? +rawX.replace('px', '') || 0 : rawX;
-    let y = typeof rawY === 'string' ? +rawY.replace('px', '') || 0 : rawY;
+    const x = typeof rawX === 'string' ? +rawX.replace('px', '') : rawX;
+    const y = typeof rawY === 'string' ? +rawY.replace('px', '') : rawY;
 
-    if (x < minX) {
-      x = minX;
-    }
-    if (y < minY) {
-      y = minY;
-    }
-    if (x > maxX) {
-      x = maxX;
-    }
-    if (y > maxY) {
-      y = maxY;
-    }
-
-    return { x, y };
+    return { x: clamp(x || 0, minX, maxX), y: clamp(y || 0, minY, maxY) };
   }
 }
