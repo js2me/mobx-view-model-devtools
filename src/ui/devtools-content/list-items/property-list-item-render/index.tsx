@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import type { CSSProperties, ReactNode } from 'react';
 import { cx } from 'yummies/css';
 import type { PropertyListItem } from '@/model/list-item/property-list-item';
+import { ListItemOperations } from '../../list-item-operations';
 import { ArrayPropertyContent } from './array';
 import { FunctionPropertyContent } from './function';
 import { InstancePropertyContent } from './instance';
@@ -49,6 +50,7 @@ export const PropertyListItemRender = observer(
           [css.null]: item.data === null,
           [css.expandable]: item.isExpandable,
           [css.expanded]: item.isExpanded,
+          [css.isEditMode]: item.isEditMode,
         })}
         style={
           { '--level': item.depth, '--order': item.order } as CSSProperties
@@ -58,25 +60,11 @@ export const PropertyListItemRender = observer(
         onClick={(e) => item.devtools.handlePropertyClick(item, e)}
         data-depth={item.depthLine}
       >
-        {content}
-        {item.extraContent}
-        {item.operations.length > 0 && (
-          <div className={css.propertyOperations}>
-            {item.operations.map((operation) => (
-              <button
-                key={operation.title}
-                title={operation.title}
-                className={css.propertyOperation}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  operation.action();
-                }}
-              >
-                <operation.icon />
-              </button>
-            ))}
-          </div>
-        )}
+        <span>
+          {content}
+          {item.extraContent}
+        </span>
+        <ListItemOperations item={item} />
       </div>
     );
   },

@@ -1,16 +1,43 @@
-import { Copy } from '@gravity-ui/icons';
-import { computed, makeObservable, observable, runInAction } from 'mobx';
+import {
+  ArrowsRotateRight,
+  Check,
+  Copy,
+  FileArrowRightOut,
+  Pencil,
+  Play,
+  Xmark,
+} from '@gravity-ui/icons';
+import {
+  computed,
+  createAtom,
+  makeObservable,
+  observable,
+  runInAction,
+} from 'mobx';
 import { typeGuard } from 'yummies/type-guard';
 import type { Maybe } from 'yummies/types';
 import { getAllKeys } from '../utils/get-all-keys';
 import type { ViewModelDevtools } from '../view-model-devtools';
-import { ListItem } from './list-item';
+import { ListItem, type ListItemOperation } from './list-item';
 import { MetaListItem } from './meta-list-item';
 import { VMListItem } from './vm-list-item';
 
 export class PropertyListItem extends ListItem<any> {
+  private dataWatchAtom = createAtom('');
+
+  isEditMode = false;
+
   get data() {
+    this.dataWatchAtom.reportObserved();
     return this.property && this.parent.data[this.property];
+  }
+
+  get descriptor() {
+    if (!this.property) {
+      return null;
+    }
+
+    return Object.getOwnPropertyDescriptor(this.parent.data, this.property);
   }
 
   get dataType() {
@@ -231,17 +258,75 @@ export class PropertyListItem extends ListItem<any> {
   }
 
   get operations() {
-    if (this.isCopiable) {
-      return [
+    const operations: ListItemOperation<any>[] = [];
+
+    if (this.isEditMode) {
+      operations.push(
         {
-          title: 'Copy',
-          icon: Copy,
-          action: () => navigator.clipboard.writeText(this.stringifiedData),
+          title: 'Apply',
+          icon: this.dataType === 'function' ? Play : Check,
+          action: () => {
+            this.isEditMode = false;
+          },
         },
-      ];
+        {
+          title: 'Cancel',
+          icon: Xmark,
+          action: () => {
+            this.isEditMode = false;
+          },
+        },
+      );
+
+      return operations;
     }
 
-    return [];
+    if (this.descriptor?.writable && this.dataType !== 'function') {
+      operations.push({
+        title: 'Edit',
+        icon: Pencil,
+        action: () => {
+          this.isEditMode = true;
+        },
+      });
+    }
+
+    if (this.dataType === 'function') {
+      operations.push({
+        title: 'Call',
+        icon: Play,
+        action: () => {
+          this.isEditMode = true;
+        },
+      });
+    }
+
+    if (this.type !== 'instance' && !this.failedStringify) {
+      operations.push({
+        title: 'Copy',
+        icon: Copy,
+        action: () => navigator.clipboard.writeText(this.stringifiedData),
+      });
+    }
+
+    operations.push(
+      {
+        title: 'Save into $temp1 global variable',
+        icon: FileArrowRightOut,
+        action: () => {
+          Object.assign(globalThis, {
+            $temp1: this.data,
+          });
+        },
+      },
+      {
+        title: 'Refresh value',
+        icon: ArrowsRotateRight,
+        action: () => this.dataWatchAtom.reportChanged(),
+      },
+    );
+
+    return operations;
   }
 
   protected constructor(
@@ -260,6 +345,7 @@ export class PropertyListItem extends ListItem<any> {
     computed(this, 'stringifiedDataType');
     computed(this, 'extraContent');
     observable.ref(this, 'failedStringify');
+    observable(this, 'isEditMode');
     makeObservable(this);
   }
 

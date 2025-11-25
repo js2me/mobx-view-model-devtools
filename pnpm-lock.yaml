@@ -39,8 +39,8 @@ importers:
         specifier: ^0.46.7
         version: 0.46.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.22(typescript@5.9.3))
       yummies:
-        specifier: ^6.3.1
-        version: 6.3.1(mobx@6.15.0)(react@18.3.1)
+        specifier: ^6.5.0
+        version: 6.5.0(mobx@6.15.0)(react@18.3.1)
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.3
@@ -3988,8 +3988,8 @@ packages:
       react:
         optional: true
 
-  yummies@6.3.1:
-    resolution: {integrity: sha512-bX9oe7TFvPmPRkoIeNifdLl9PVarojz4ZrlvKJbnJ+BoFJ5bm2yle27Mss9N4aQ4itLwnMdXgNFWfm4cVFvVRw==}
+  yummies@6.5.0:
+    resolution: {integrity: sha512-boTeCzkitGzEkMWAgBA7yjH+RU4zOCtw37jhc/9GHLucPGbOeUrukUcNBMo/wRlvETHX0mEm2PtxZ3O0v63qRw==}
     peerDependencies:
       mobx: ^6.12.4
       react: ^18 || ^19
@@ -6766,7 +6766,7 @@ snapshots:
       linked-abort-controller: 1.1.1
       lodash-es: 4.17.21
       mobx: 6.15.0
-      yummies: 6.3.1(mobx@6.15.0)(react@18.3.1)
+      yummies: 6.5.0(mobx@6.15.0)(react@18.3.1)
     transitivePeerDependencies:
       - react
 
@@ -6774,7 +6774,7 @@ snapshots:
     dependencies:
       mobx: 6.15.0
       react-simple-loadable: 2.3.9(react@18.3.1)
-      yummies: 6.3.1(mobx@6.15.0)(react@18.3.1)
+      yummies: 6.5.0(mobx@6.15.0)(react@18.3.1)
     optionalDependencies:
       mobx-react-lite: 4.1.1(mobx@6.15.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -8132,7 +8132,7 @@ snapshots:
       mobx: 6.15.0
       react: 18.3.1
 
-  yummies@6.3.1(mobx@6.15.0)(react@18.3.1):
+  yummies@6.5.0(mobx@6.15.0)(react@18.3.1):
     dependencies:
       class-variance-authority: 0.7.1
       clsx: 2.1.1

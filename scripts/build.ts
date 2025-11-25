@@ -165,13 +165,15 @@ const createBundle = async ({
 const main = async () => {
   const configs = ConfigsManager.create();
 
-  await createBundle({
-    configs,
-    buildEnvs: {
-      version: 'default',
-      isDev: process.env.NODE_ENV === 'development',
-    },
-  });
+  if (!process.env.GLOBAL_ONLY) {
+    await createBundle({
+      configs,
+      buildEnvs: {
+        version: 'default',
+        isDev: process.env.NODE_ENV === 'development',
+      },
+    });
+  }
   await createBundle({
     configs,
     buildEnvs: {

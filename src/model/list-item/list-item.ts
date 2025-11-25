@@ -1,8 +1,16 @@
 import { action, computed, makeObservable } from 'mobx';
-import { type ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import type { ViewModelDevtools } from '../view-model-devtools';
 
 export type ListItemViewProps<T extends ListItem<any>> = { item: T };
+
+export type ListItemOperation<T> =
+  | {
+      title: string;
+      icon: ComponentType;
+      action: VoidFunction;
+    }
+  | ComponentType<ListItemViewProps<ListItem<T>>>;
 
 export abstract class ListItem<T> {
   cache: Map<string, any>;
@@ -82,11 +90,7 @@ export abstract class ListItem<T> {
     return String(this.data);
   }
 
-  get operations(): {
-    title: string;
-    icon: ComponentType;
-    action: VoidFunction;
-  }[] {
+  get operations(): ListItemOperation<T>[] {
     return [];
   }
 

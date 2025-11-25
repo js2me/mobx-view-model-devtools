@@ -76,3 +76,8 @@
     filter: grayscale(1);
   }
 }
+
+
+html:has( .dragging) *{
+  user-select: none !important;
+}

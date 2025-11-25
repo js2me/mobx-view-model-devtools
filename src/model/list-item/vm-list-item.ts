@@ -1,13 +1,18 @@
-import { computed, makeObservable, untracked } from 'mobx';
+import { ArrowsRotateRight, FileArrowRightOut } from '@gravity-ui/icons';
+import { computed, createAtom, makeObservable, untracked } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
 import type { AnyVM } from '../types';
 import { getAllKeys } from '../utils/get-all-keys';
 import type { ViewModelDevtools } from '../view-model-devtools';
-import { ListItem } from './list-item';
+import { ListItem, type ListItemOperation } from './list-item';
 import { PropertyListItem } from './property-list-item';
 
 export class VMListItem extends ListItem<AnyVM> {
+  private dataWatchAtom = createAtom('');
+
   private get childVMListItems(): VMListItem[] {
+    this.dataWatchAtom.reportObserved();
+
     return this.allVms
       .filter((maybeChildVm) => {
         const params = this.getVmParams(maybeChildVm);
@@ -41,10 +46,12 @@ export class VMListItem extends ListItem<AnyVM> {
   }
 
   private get propertyListItems(): PropertyListItem[] {
+    this.dataWatchAtom.reportObserved();
+
     let keys = getAllKeys(this.data);
 
     if (this.devtools.sortPropertiesBy !== 'none') {
-      keys = keys.sort((a,b ) => {
+      keys = keys.sort((a, b) => {
         if (this.devtools.sortPropertiesBy === 'asc') {
           return a.localeCompare(b);
         }
@@ -73,6 +80,25 @@ export class VMListItem extends ListItem<AnyVM> {
     }
 
     return null;
+  }
+
+  get operations(): ListItemOperation<any>[] {
+    return [
+      {
+        title: 'Save into $temp1 global variable',
+        icon: FileArrowRightOut,
+        action: () => {
+          Object.assign(globalThis, {
+            $temp1: this.data,
+          });
+        },
+      },
+      {
+        title: 'Refresh value',
+        icon: ArrowsRotateRight,
+        action: () => this.dataWatchAtom.reportChanged(),
+      },
+    ];
   }
 
   get depth(): number {

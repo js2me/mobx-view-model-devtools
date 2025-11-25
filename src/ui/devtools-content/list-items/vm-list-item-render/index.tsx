@@ -4,6 +4,7 @@ import { cx } from 'yummies/css';
 import type { VMListItem } from '@/model/list-item/vm-list-item';
 import css from '@/styles.module.css';
 import { ExpandButton } from '@/ui/devtools-content/expand-button';
+import { ListItemOperations } from '../../list-item-operations';
 
 export const VmListItemRender = observer(({ item }: { item: VMListItem }) => {
   return (
@@ -29,6 +30,7 @@ export const VmListItemRender = observer(({ item }: { item: VMListItem }) => {
           {item.data.id}
         </span>
       </header>
+      <ListItemOperations item={item} />
     </div>
   );
 });

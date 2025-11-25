@@ -404,3 +404,23 @@
     rgba(0, 0, 0, 0) 100%
   );
 }
+
+[data-list-item-operations] {
+  position: relative;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 4px;
+  width: 0;
+  transition: all 150ms ease;
+  overflow: hidden;
+}
+
+*:has(> [data-list-item-operations]):hover > [data-list-item-operations] {
+  width: auto;
+}
+
+[data-list-item-operation]:active {
+  transform: scale(0.9);
+}

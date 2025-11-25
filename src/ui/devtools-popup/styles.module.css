@@ -8,6 +8,13 @@
   max-width: 520px;
   box-shadow: 0 5px 20px #00000066;
 
+  &.dragging {
+    transition: none;
+    cursor: grabbing;
+    opacity: 0.8;
+    z-index: 1000;
+  }
+
   &[data-position="top-right"] {
     top: 12px;
     right: 12px;
@@ -39,4 +46,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+html:has( .dragging) *{
+  user-select: none !important;
 }

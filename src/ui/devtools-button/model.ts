@@ -6,6 +6,7 @@ import { createRef } from 'yummies/mobx';
 import type { Defined, Maybe } from 'yummies/types';
 import type { ViewModelDevtoolsConfig } from '@/model';
 import type { DevtoolsClientVM } from '../devtools-client/model';
+import { VmDevtoolsPopupVM } from '../devtools-popup/model';
 import css from './styles.module.css';
 
 export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
@@ -60,13 +61,14 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
 
         node.style.left = `${x}px`;
         node.style.top = `${y}px`;
+        VmDevtoolsPopupVM.lastX = null;
 
         if (x !== dragState.startX || y !== dragState.startY) {
           dragState.hasMoved = true;
         }
       };
 
-      const handleMouseUp = () => {
+      const handleStopDragging = () => {
         dragState.isDragging = false;
         node.classList.remove(css.dragging);
 
@@ -90,7 +92,8 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
       });
 
       document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mouseup', handleStopDragging);
+      window.addEventListener('blur', handleStopDragging);
     },
   });
 

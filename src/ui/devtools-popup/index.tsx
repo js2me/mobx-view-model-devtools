@@ -1,17 +1,18 @@
 import { Xmark } from '@gravity-ui/icons';
-import { observer } from 'mobx-react-lite';
-import { useViewModel } from 'mobx-view-model';
-import type { DevtoolsClientVM } from '../devtools-client/model';
+import { withViewModel } from 'mobx-view-model';
 import { VmDevtoolsContent } from '../devtools-content';
+import { VmDevtoolsPopupVM } from './model';
 import css from './styles.module.css';
 
-export const VmDevtoolsPopup = observer(() => {
-  const model = useViewModel<DevtoolsClientVM>();
-
+export const VmDevtoolsPopup = withViewModel(VmDevtoolsPopupVM, ({ model }) => {
   return (
     <VmDevtoolsContent
       className={css.vmPopup}
       data-position={model.devtools.position}
+      payload={{
+        devtools: model.devtools,
+        ref: model.contentRef,
+      }}
       headerContent={
         <button
           className={css.closePopupButton}

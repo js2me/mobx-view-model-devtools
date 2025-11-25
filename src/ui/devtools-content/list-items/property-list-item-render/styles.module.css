@@ -16,12 +16,19 @@
   padding-left: calc(0px + 28px + (var(--level) * 15px));
 }
 
-.property:hover {
+.property:hover, .property.isEditMode {
   background: var(--vmd-content-highlight-bg);
 }
 
 .property.expandable {
   cursor: pointer;
+}
+
+.property > span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 12px;
 }
 
 .property[data-fitted='false'] {
@@ -72,14 +79,6 @@
   margin-right: 4px;
 }
 
-.propertyOperations {
-  position: absolute;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  opacity: 0;
-}
-
-.property:hover > .propertyOperations {
-  opacity: 1;
+.property.isEditMode > [data-list-item-operations] {
+  width: auto;
 }
