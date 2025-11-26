@@ -72,11 +72,11 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
         dragState.isDragging = false;
         node.classList.remove(css.dragging);
 
+        this.storage.set({ key: 'left', value: node.style.left });
+        this.storage.set({ key: 'top', value: node.style.top });
         if (this.position !== this.devtools.position) {
           runInAction(() => {
             this.devtools.position = this.position;
-            this.storage.set({ key: 'left', value: node.style.left });
-            this.storage.set({ key: 'top', value: node.style.top });
           });
         }
       };

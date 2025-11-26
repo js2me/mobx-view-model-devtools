@@ -2,7 +2,7 @@ import { computed, makeObservable, untracked } from 'mobx';
 import type { AnyObject } from 'yummies/types';
 import type { AnyVM } from '../types';
 import type { ViewModelDevtools } from '../view-model-devtools';
-import { ListItem } from './list-item';
+import { ListItem, type ListItemOperation } from './list-item';
 import { PropertyListItem } from './property-list-item';
 
 export class ExtraListItem extends ListItem<AnyVM> {
@@ -28,6 +28,8 @@ export class ExtraListItem extends ListItem<AnyVM> {
   }
 
   private get propertyListItems(): PropertyListItem[] {
+    this.dataWatchAtom.reportObserved();
+
     let keys = Object.keys(this.data || {});
 
     if (this.devtools.sortPropertiesBy !== 'none') {
@@ -52,6 +54,10 @@ export class ExtraListItem extends ListItem<AnyVM> {
 
   get children(): ListItem<any>[] {
     return [...this.propertyListItems];
+  }
+
+  get operations(): ListItemOperation<any>[] {
+    return super.operations;
   }
 
   get depth(): number {

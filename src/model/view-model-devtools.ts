@@ -18,6 +18,7 @@ import type { VirtualizerHandle, VListHandle } from 'virtua';
 import { createRef, type Ref } from 'yummies/mobx';
 import type { AnyObject, Defined, Maybe } from 'yummies/types';
 import { DevtoolsClient } from '@/ui/devtools-client';
+import { Notifications } from '@/ui/devtools-content/notifications';
 import css from '../styles.module.css';
 import { KeyboardHandler } from './keyboard-handler';
 import { ViewModelImpl } from './lib/view-model.impl';
@@ -188,6 +189,10 @@ export class ViewModelDevtools {
   showPopup() {
     this.isPopupOpened = true;
     this.expandAllVMs();
+  }
+
+  get notifications() {
+    return this.vmStore.get(Notifications)!;
   }
 
   hidePopup() {

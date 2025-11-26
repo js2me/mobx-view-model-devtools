@@ -3,6 +3,7 @@ import {
   KeyboardHandler as KeyboardHandlerLib,
 } from 'mobx-swiss-knife';
 import type { ViewModelDevtools } from './view-model-devtools';
+import { typeGuard } from "yummies/type-guard";
 
 export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
   constructor(devtools: ViewModelDevtools) {
@@ -10,7 +11,10 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
       actions: [
         {
           shortcuts: ['Ctrl+F12'],
-          action: () => {
+          action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             if (devtools.isPopupOpened) {
               devtools.hidePopup();
             } else {
@@ -20,25 +24,38 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
         },
         {
           shortcuts: ['Escape'],
-          action: () => {
+          action: (e) => {
+            console.log('ee', e);
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             devtools.hidePopup();
           },
         },
         {
           shortcuts: ['Ctrl+ArrowLeft'],
-          action: () => {
+          action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             devtools.collapseAllVms();
           },
         },
         {
           shortcuts: ['Ctrl+ArrowRight'],
-          action: () => {
+          action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             devtools.expandAllVMs();
           },
         },
         {
           shortcuts: ['Tab'],
           action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             if (devtools.searchEngine.searchInputRef.meta.focused) {
               e.preventDefault();
             }
@@ -47,6 +64,9 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
         {
           shortcuts: ['Ctrl+ArrowDown', 'PageDown'],
           action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             if (!devtools.scrollListRef.current) return;
 
             devtools.scrollListRef.current.scrollTo(
@@ -62,6 +82,9 @@ export class KeyboardHandler extends KeyboardHandlerLib<KeyboardHandlerAction> {
         {
           shortcuts: ['Ctrl+ArrowUp', 'PageUp'],
           action: (e) => {
+            if (typeGuard.isElement(e.target) && e.target.dataset.ignoreGlobalKeys) {
+              return;
+            }
             if (!devtools.scrollListRef.current) return;
 
             devtools.scrollListRef.current.scrollTo(

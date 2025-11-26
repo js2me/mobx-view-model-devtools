@@ -1,19 +1,14 @@
+import { Check, Copy, Pencil, Play, Xmark } from '@gravity-ui/icons';
 import {
-  ArrowsRotateRight,
-  Check,
-  Copy,
-  FileArrowRightOut,
-  Pencil,
-  Play,
-  Xmark,
-} from '@gravity-ui/icons';
-import {
+  action,
   computed,
-  createAtom,
   makeObservable,
+  ObservableMap,
+  ObservableSet,
   observable,
   runInAction,
 } from 'mobx';
+import type { ChangeEventHandler } from 'react';
 import { typeGuard } from 'yummies/type-guard';
 import type { Maybe } from 'yummies/types';
 import { getAllKeys } from '../utils/get-all-keys';
@@ -22,8 +17,10 @@ import { ListItem, type ListItemOperation } from './list-item';
 import { MetaListItem } from './meta-list-item';
 import { VMListItem } from './vm-list-item';
 
+console.log('dd', ObservableMap, ObservableSet);
+
 export class PropertyListItem extends ListItem<any> {
-  private dataWatchAtom = createAtom('');
+  editContent = '';
 
   isEditMode = false;
 
@@ -262,13 +259,25 @@ export class PropertyListItem extends ListItem<any> {
 
     if (this.isEditMode) {
       operations.push(
-        {
-          title: 'Apply',
-          icon: this.dataType === 'function' ? Play : Check,
-          action: () => {
-            this.isEditMode = false;
-          },
-        },
+        this.dataType === 'function'
+          ? {
+              title: 'Call function',
+              icon: Play,
+              action: () => {
+                // biome-ignore lint/security/noGlobalEval: no way...
+                const args = eval(`[${this.editContent.trim()}]`);
+                this.data.apply(this.parent.data, args);
+                this.editContent = '';
+                this.isEditMode = false;
+              },
+            }
+          : {
+              title: 'Apply',
+              icon: Check,
+              action: () => {
+                this.isEditMode = false;
+              },
+            },
         {
           title: 'Cancel',
           icon: Xmark,
@@ -281,20 +290,18 @@ export class PropertyListItem extends ListItem<any> {
       return operations;
     }
 
-    if (this.descriptor?.writable && this.dataType !== 'function') {
-      operations.push({
-        title: 'Edit',
-        icon: Pencil,
-        action: () => {
-          this.isEditMode = true;
-        },
-      });
-    }
-
     if (this.dataType === 'function') {
       operations.push({
         title: 'Call',
         icon: Play,
+        action: () => {
+          this.isEditMode = true;
+        },
+      });
+    } else {
+      operations.push({
+        title: 'Edit',
+        icon: Pencil,
         action: () => {
           this.isEditMode = true;
         },
@@ -309,24 +316,15 @@ export class PropertyListItem extends ListItem<any> {
       });
     }
 
-    operations.push(
-      {
-        title: 'Save into $temp1 global variable',
-        icon: FileArrowRightOut,
-        action: () => {
-          Object.assign(globalThis, {
-            $temp1: this.data,
-          });
-        },
-      },
-      {
-        title: 'Refresh value',
-        icon: ArrowsRotateRight,
-        action: () => this.dataWatchAtom.reportChanged(),
-      },
-    );
+    return [...operations, ...super.operations];
+  }
 
-    return operations;
+  handleChangeEditContent: ChangeEventHandler<HTMLInputElement> = (e) => {
+    this.editContent = e.target.value;
+  };
+
+  getSavedTempVarNotification(tempVarName: string) {
+    return `Property value "${this.property}" saved into ${tempVarName}`;
   }
 
   protected constructor(
@@ -345,7 +343,9 @@ export class PropertyListItem extends ListItem<any> {
     computed(this, 'stringifiedDataType');
     computed(this, 'extraContent');
     observable.ref(this, 'failedStringify');
+    observable.ref(this, 'editContent');
     observable(this, 'isEditMode');
+    action(this, 'handleChangeEditContent');
     makeObservable(this);
   }
 

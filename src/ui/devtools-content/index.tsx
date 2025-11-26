@@ -21,6 +21,7 @@ import { MetaListItemRender } from './list-items/meta-list-item-render';
 import { PropertyListItemRender } from './list-items/property-list-item-render';
 import { VmListItemRender } from './list-items/vm-list-item-render';
 import { DevtoolsContentVM } from './model';
+import { Notifications } from './notifications';
 import css from './styles.module.css';
 
 export const VmDevtoolsContent = withViewModel(
@@ -43,6 +44,7 @@ export const VmDevtoolsContent = withViewModel(
         ref={model.contentRef}
       >
         <header className={css.vmContentHeader}>
+          <Notifications />
           <div className={css.gradientBlur} />
           <div className={css.vmContentHeaderTitle} data-content-header>
             <img className={css.vmContentHeaderLogo} src={devtools.logoUrl} />

@@ -1,4 +1,5 @@
-import { action, computed, makeObservable } from 'mobx';
+import { ArrowsRotateRight, FileArrowRightOut } from '@gravity-ui/icons';
+import { action, computed, createAtom, makeObservable } from 'mobx';
 import type { ComponentType } from 'react';
 import type { ViewModelDevtools } from '../view-model-devtools';
 
@@ -14,6 +15,10 @@ export type ListItemOperation<T> =
 
 export abstract class ListItem<T> {
   cache: Map<string, any>;
+
+  protected tempVarName: string = '';
+
+  protected dataWatchAtom = createAtom('');
 
   get isExpanded() {
     return this.cache.get(this.expandKey) === true;
@@ -91,7 +96,40 @@ export abstract class ListItem<T> {
   }
 
   get operations(): ListItemOperation<T>[] {
-    return [];
+    return [
+      {
+        title: 'Save into $temp(N) global variable. $temp1, $temp2, $temp3',
+        icon: FileArrowRightOut,
+        action: () => {
+          if (!this.tempVarName) {
+            let counter = 1;
+
+            while (`$temp${counter}` in globalThis) {
+              counter++;
+            }
+
+            this.tempVarName = `$temp${counter}`;
+          }
+
+          Object.assign(globalThis, {
+            [this.tempVarName]: this.data,
+          });
+
+          this.devtools.notifications.push({
+            title: this.getSavedTempVarNotification(this.tempVarName),
+          });
+        },
+      },
+      {
+        title: 'Refresh value',
+        icon: ArrowsRotateRight,
+        action: () => this.dataWatchAtom.reportChanged(),
+      },
+    ];
+  }
+
+  getSavedTempVarNotification(tempVarName: string) {
+    return `Saved into ${tempVarName}`;
   }
 
   expandKey;

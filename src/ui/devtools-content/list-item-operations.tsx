@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import type { ComponentType } from 'react';
 import type { ListItem, ListItemViewProps } from '@/model/list-item/list-item';
+import { runInAction } from 'mobx';
 
 export interface PropertyOperationProps {
   item: ListItem<any>;
@@ -23,7 +24,9 @@ export const ListItemOperations = observer(
                 data-list-item-operation
                 onClick={(e) => {
                   e.stopPropagation();
-                  operation.action();
+                  runInAction(() => {
+                    operation.action();
+                  })
                 }}
               >
                 <operation.icon />

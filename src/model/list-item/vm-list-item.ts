@@ -1,5 +1,4 @@
-import { ArrowsRotateRight, FileArrowRightOut } from '@gravity-ui/icons';
-import { computed, createAtom, makeObservable, untracked } from 'mobx';
+import { computed, makeObservable, untracked } from 'mobx';
 import type { ViewModelParams } from 'mobx-view-model';
 import type { AnyVM } from '../types';
 import { getAllKeys } from '../utils/get-all-keys';
@@ -8,8 +7,6 @@ import { ListItem, type ListItemOperation } from './list-item';
 import { PropertyListItem } from './property-list-item';
 
 export class VMListItem extends ListItem<AnyVM> {
-  private dataWatchAtom = createAtom('');
-
   private get childVMListItems(): VMListItem[] {
     this.dataWatchAtom.reportObserved();
 
@@ -82,23 +79,12 @@ export class VMListItem extends ListItem<AnyVM> {
     return null;
   }
 
+  getSavedTempVarNotification(tempVarName: string) {
+    return `VM instance ${this.displayName} (${this.data.id}) saved into ${tempVarName}`;
+  }
+
   get operations(): ListItemOperation<any>[] {
-    return [
-      {
-        title: 'Save into $temp1 global variable',
-        icon: FileArrowRightOut,
-        action: () => {
-          Object.assign(globalThis, {
-            $temp1: this.data,
-          });
-        },
-      },
-      {
-        title: 'Refresh value',
-        icon: ArrowsRotateRight,
-        action: () => this.dataWatchAtom.reportChanged(),
-      },
-    ];
+    return super.operations;
   }
 
   get depth(): number {
