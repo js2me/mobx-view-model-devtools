@@ -13,9 +13,9 @@ ViewModelDevtools.define({
   defaultIsOpened: false,
 });
 
-if (buildEnvs.isDev) {
-  ViewModelDevtools.connectExtras(window);
-}
+ViewModelDevtools.connectExtras({
+  globalThis,
+});
 
 const connectStore = (store: any) => {
   if (ViewModelStoreImpl === store.constructor) {
@@ -30,4 +30,4 @@ if (lastCreatedStore) {
 }
 viewModelsConfig.hooks.storeCreate.sub(connectStore);
 
-console.log('auto.global script loaded')
+console.log('auto.global script loaded');

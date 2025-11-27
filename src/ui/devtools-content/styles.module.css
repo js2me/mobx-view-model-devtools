@@ -17,6 +17,10 @@
   }
 }
 
+.vmContentVirtualizedContent {
+  overflow: hidden;
+}
+
 .vmContent[data-simplebar] {
   position: relative;
   flex-direction: column;
@@ -360,12 +364,7 @@
   display: block;
 }
 
-.vmContentVirtualized {
-  flex: 1;
-}
-
-.vmContentVirtualized > div > div {
-  height: 22px;
+.vmContentVirtualScroll {
 }
 
 .gradientBlur {

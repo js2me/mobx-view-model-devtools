@@ -75,6 +75,7 @@ export class ViewModelDevtools {
   }
 
   private get rootVmListItems() {
+    console.log('tick root vm list items?');
     return this.allVms
       .filter((vm) => {
         const vmParams = this.getVmParams(vm);
@@ -84,6 +85,7 @@ export class ViewModelDevtools {
   }
 
   private get extraListItems() {
+    console.log('tick extra list items?');
     if (!this.extras) {
       return [];
     }
@@ -91,10 +93,17 @@ export class ViewModelDevtools {
   }
 
   get listItems(): ListItem<any>[] {
-    return [
-      ...this.rootVmListItems.flatMap((it) => it.expandedChildrenWithSelf),
-      ...this.extraListItems.flatMap((it) => it.expandedChildrenWithSelf),
-    ];
+    const listItems: ListItem<any>[] = [];
+
+    this.rootVmListItems.forEach((vmListItem) => {
+      listItems.push(...vmListItem.expandedChildrenWithSelf);
+    });
+
+    this.extraListItems.forEach((listItem) => {
+      listItems.push(...listItem.expandedChildrenWithSelf);
+    });
+
+    return listItems;
   }
 
   get isActive() {
@@ -130,16 +139,6 @@ export class ViewModelDevtools {
     e: React.MouseEvent<HTMLElement>,
   ) {
     item.toggleExpand();
-  }
-
-  handleExpandExtraPropertyClick(path: string) {
-    const expandedKey = `__EXTRA__%%%${path}`;
-
-    if (this.expandedVmItemsPaths.has(expandedKey)) {
-      this.expandedVmItemsPaths.delete(expandedKey);
-    } else {
-      this.expandedVmItemsPaths.add(expandedKey);
-    }
   }
 
   handleVmItemHeaderClick(vmItem: VMListItem): void {
@@ -320,8 +319,8 @@ export class ViewModelDevtools {
       handleExpandVmPropertyClick: action.bound,
       expandAllVMs: action.bound,
       collapseAllVms: action.bound,
-      handleExpandExtraPropertyClick: action.bound,
       isActive: computed,
+      listItems: computed.struct,
       rootVmListItems: computed.struct,
       extraListItems: computed.struct,
     });

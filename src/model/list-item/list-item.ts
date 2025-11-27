@@ -2,6 +2,7 @@ import { ArrowsRotateRight, FileArrowRightOut } from '@gravity-ui/icons';
 import { action, computed, createAtom, makeObservable } from 'mobx';
 import type { ComponentType } from 'react';
 import type { ViewModelDevtools } from '../view-model-devtools';
+import { AnyObject } from 'yummies/types';
 
 export type ListItemViewProps<T extends ListItem<any>> = { item: T };
 
@@ -14,6 +15,10 @@ export type ListItemOperation<T> =
   | ComponentType<ListItemViewProps<ListItem<T>>>;
 
 export abstract class ListItem<T> {
+  position: number = 0;
+
+  metaData: AnyObject = {};
+  
   cache: Map<string, any>;
 
   protected tempVarName: string = '';

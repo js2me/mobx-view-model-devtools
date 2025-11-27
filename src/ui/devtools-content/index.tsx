@@ -9,7 +9,6 @@ import {
 } from '@gravity-ui/icons';
 import { type ViewModelProps, withViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
-import { Virtualizer } from 'virtua';
 import { cx } from 'yummies/css';
 import { ExtraListItem } from '@/model/list-item/extra-list-item';
 import { MetaListItem } from '@/model/list-item/meta-list-item';
@@ -103,14 +102,12 @@ export const VmDevtoolsContent = withViewModel(
             </div>
           </div>
         </header>
-        <div className={css.vmContentVirtualized}>
-          <Virtualizer
-            ref={devtools.scrollListRef}
-            itemSize={22}
-            data={devtools.listItems}
-            keepMounted={[0]}
-          >
-            {(listItem) => {
+        <div
+          className={css.vmContentVirtualScroll}
+          style={{ height: devtools.listItems.length * 22 }} // 10_0000
+        >
+          <div className={css.vmContentVirtualizedContent} ref={model.virtualizedContentRef}>
+            {model.items.map((listItem) => {
               if (listItem instanceof VMListItem) {
                 return <VmListItemRender item={listItem} key={listItem.key} />;
               }
@@ -133,9 +130,9 @@ export const VmDevtoolsContent = withViewModel(
                 );
               }
 
-              return <></>;
-            }}
-          </Virtualizer>
+              return null;
+            })}
+          </div>
         </div>
       </div>
     );
