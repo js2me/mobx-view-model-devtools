@@ -1,4 +1,6 @@
 import { clamp } from 'lodash-es';
+import { reaction } from 'mobx';
+import { pageVisibility } from 'mobx-web-api';
 import { createRef } from 'yummies/mobx';
 import type { Defined, Maybe } from 'yummies/types';
 import { type ViewModelDevtoolsConfig, ViewModelImpl } from '@/model';
@@ -25,25 +27,29 @@ export class VmDevtoolsPopupVM extends ViewModelImpl<{}, DevtoolsClientVM> {
         node.style.left = `${this.fixX(VmDevtoolsPopupVM.lastX)}px`;
       }
 
-      node.addEventListener('mousedown', (e: MouseEvent) => {
-        const path = e.composedPath();
-        const isDragOnContentHeader = path.some(
-          (it) => (it as HTMLElement).dataset?.contentHeader,
-        );
+      node.addEventListener(
+        'mousedown',
+        (e: MouseEvent) => {
+          const path = e.composedPath();
+          const isDragOnContentHeader = path.some(
+            (it) => (it as HTMLElement).dataset?.contentHeader,
+          );
 
-        if (!isDragOnContentHeader) {
-          return;
-        }
+          if (!isDragOnContentHeader) {
+            return;
+          }
 
-        this.dragState.isDragging = true;
-        this.dragState.hasMoved = false;
+          this.dragState.isDragging = true;
+          this.dragState.hasMoved = false;
 
-        const rect = node.getBoundingClientRect();
-        this.dragState.offsetX = rect.left - e.clientX;
-        this.dragState.startX = rect.left;
+          const rect = node.getBoundingClientRect();
+          this.dragState.offsetX = rect.left - e.clientX;
+          this.dragState.startX = rect.left;
 
-        node.classList.add(css.dragging);
-      });
+          node.classList.add(css.dragging);
+        },
+        { signal: this.unmountSignal },
+      );
 
       const handleMouseMove = (e: MouseEvent) => {
         if (!this.dragState.isDragging) return;
@@ -73,9 +79,27 @@ export class VmDevtoolsPopupVM extends ViewModelImpl<{}, DevtoolsClientVM> {
       //   }
       // });
 
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleStopDragging);
-      window.addEventListener('blur', handleStopDragging);
+      reaction(
+        () => pageVisibility.isHidden,
+        (isHiddenPage) => {
+          if (isHiddenPage) {
+            handleStopDragging();
+          }
+        },
+        {
+          signal: this.unmountSignal,
+        },
+      );
+
+      document.addEventListener('mousemove', handleMouseMove, {
+        signal: this.unmountSignal,
+      });
+      document.addEventListener('mouseup', handleStopDragging, {
+        signal: this.unmountSignal,
+      });
+      window.addEventListener('blur', handleStopDragging, {
+        signal: this.unmountSignal,
+      });
     },
   });
 

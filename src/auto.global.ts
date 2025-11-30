@@ -22,7 +22,7 @@ const connectStore = (store: any) => {
     return;
   }
 
-  ViewModelDevtools.connect(store as any);
+  ViewModelDevtools.connectViewModels(store as any);
 };
 
 if (lastCreatedStore) {

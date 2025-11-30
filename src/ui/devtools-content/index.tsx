@@ -10,15 +10,7 @@ import {
 import { type ViewModelProps, withViewModel } from 'mobx-view-model';
 import type { ReactNode } from 'react';
 import { cx } from 'yummies/css';
-import { ExtraListItem } from '@/model/list-item/extra-list-item';
-import { MetaListItem } from '@/model/list-item/meta-list-item';
-import { PropertyListItem } from '@/model/list-item/property-list-item';
-import { VMListItem } from '@/model/list-item/vm-list-item';
 import { IconToggleButton } from '../shared/icon-toggle-button';
-import { ExtraListItemRender } from './list-items/extra-list-item-render';
-import { MetaListItemRender } from './list-items/meta-list-item-render';
-import { PropertyListItemRender } from './list-items/property-list-item-render';
-import { VmListItemRender } from './list-items/vm-list-item-render';
 import { DevtoolsContentVM } from './model';
 import { Notifications } from './notifications';
 import css from './styles.module.css';
@@ -104,34 +96,13 @@ export const VmDevtoolsContent = withViewModel(
         </header>
         <div
           className={css.vmContentVirtualScroll}
-          style={{ height: devtools.listItems.length * 22 }} // 10_0000
+          style={{ height: model.virtualHeight }} // 10_0000
         >
-          <div className={css.vmContentVirtualizedContent} ref={model.virtualizedContentRef}>
-            {model.items.map((listItem) => {
-              if (listItem instanceof VMListItem) {
-                return <VmListItemRender item={listItem} key={listItem.key} />;
-              }
-              if (listItem instanceof ExtraListItem) {
-                return (
-                  <ExtraListItemRender item={listItem} key={listItem.key} />
-                );
-              }
-              if (listItem instanceof PropertyListItem) {
-                return (
-                  <PropertyListItemRender
-                    item={listItem as any}
-                    key={listItem.key}
-                  />
-                );
-              }
-              if (listItem instanceof MetaListItem) {
-                return (
-                  <MetaListItemRender item={listItem} key={listItem.key} />
-                );
-              }
-
-              return null;
-            })}
+          <div
+            className={css.vmContentVirtualizedContent}
+            ref={model.virtualizedContentRef}
+          >
+            {model.itemNodes}
           </div>
         </div>
       </div>

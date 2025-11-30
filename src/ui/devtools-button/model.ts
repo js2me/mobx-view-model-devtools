@@ -38,18 +38,22 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
       node.style.left = `${x}px`;
       node.style.top = `${y}px`;
 
-      node.addEventListener('mousedown', (e: MouseEvent) => {
-        dragState.isDragging = true;
-        dragState.hasMoved = false;
+      node.addEventListener(
+        'mousedown',
+        (e: MouseEvent) => {
+          dragState.isDragging = true;
+          dragState.hasMoved = false;
 
-        const rect = node.getBoundingClientRect();
-        dragState.offsetX = rect.left - e.clientX;
-        dragState.offsetY = rect.top - e.clientY;
-        dragState.startX = rect.left;
-        dragState.startY = rect.top;
+          const rect = node.getBoundingClientRect();
+          dragState.offsetX = rect.left - e.clientX;
+          dragState.offsetY = rect.top - e.clientY;
+          dragState.startX = rect.left;
+          dragState.startY = rect.top;
 
-        node.classList.add(css.dragging);
-      });
+          node.classList.add(css.dragging);
+        },
+        { signal: this.unmountSignal },
+      );
 
       const handleMouseMove = (e: MouseEvent) => {
         if (!dragState.isDragging) return;
@@ -81,19 +85,29 @@ export class VmDevtoolsButtonVM extends ViewModelBase<{}, DevtoolsClientVM> {
         }
       };
 
-      node.addEventListener('click', (e: MouseEvent) => {
-        if (dragState.hasMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
+      node.addEventListener(
+        'click',
+        (e: MouseEvent) => {
+          if (dragState.hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
 
-        this.handleClick();
+          this.handleClick();
+        },
+        { signal: this.unmountSignal },
+      );
+
+      document.addEventListener('mousemove', handleMouseMove, {
+        signal: this.unmountSignal,
       });
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleStopDragging);
-      window.addEventListener('blur', handleStopDragging);
+      document.addEventListener('mouseup', handleStopDragging, {
+        signal: this.unmountSignal,
+      });
+      window.addEventListener('blur', handleStopDragging, {
+        signal: this.unmountSignal,
+      });
     },
   });
 

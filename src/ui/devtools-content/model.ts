@@ -1,3 +1,4 @@
+import { debounce } from 'lodash-es';
 import {
   computed,
   makeObservable,
@@ -5,17 +6,33 @@ import {
   reaction,
   runInAction,
 } from 'mobx';
+import { createElement, type ReactNode } from 'react';
 import SimpleBar from 'simplebar';
 import { createRef, type Ref } from 'yummies/mobx';
 import type { Maybe } from 'yummies/types';
 import { type ViewModelDevtools, ViewModelImpl } from '@/model';
-import type { ListItem } from '@/model/list-item/list-item';
+import { ExtraListItem } from '@/model/list-item/extra-list-item';
+import { MetaListItem } from '@/model/list-item/meta-list-item';
+import { PropertyListItem } from '@/model/list-item/property-list-item';
+import { VMListItem } from '@/model/list-item/vm-list-item';
+import { ExtraListItemRender } from './list-items/extra-list-item-render';
+import { MetaListItemRender } from './list-items/meta-list-item-render';
+import { PropertyListItemRender } from './list-items/property-list-item-render';
+import { VmListItemRender } from './list-items/vm-list-item-render';
 
+const listItemRenderersMap = new Map<any, any>([
+  [VMListItem, VmListItemRender],
+  [ExtraListItem, ExtraListItemRender],
+  [PropertyListItem, PropertyListItemRender],
+  [MetaListItem, MetaListItemRender],
+]);
 export class DevtoolsContentVM extends ViewModelImpl<{
   devtools: ViewModelDevtools;
   ref?: Ref<HTMLDivElement>;
 }> {
   private offsetIndex = -4;
+
+  itemsCount = 0;
 
   contentRef = createRef<HTMLDivElement, { scrollbar: Maybe<SimpleBar> }>({
     meta: { scrollbar: null },
@@ -25,7 +42,13 @@ export class DevtoolsContentVM extends ViewModelImpl<{
       this.contentRef.meta = { scrollbar };
       const scrollElement = scrollbar.getScrollElement();
 
+      console.log('on set');
+
       if (!scrollElement) return;
+
+      runInAction(() => {
+        this.itemsCount = Math.round(scrollElement.clientHeight / 22) + 40 + 4;
+      });
 
       reaction(
         () => this.payload.devtools.listItems.length,
@@ -34,35 +57,36 @@ export class DevtoolsContentVM extends ViewModelImpl<{
           fireImmediately: true,
         },
       );
-      this.virtualizedContentRef.current!.style.height = `${node.clientHeight - 60}px`;
-      scrollElement.addEventListener('scroll', this.handleRefreshItems);
+      this.virtualizedContentRef.current!.style.height =
+        `${node.clientHeight - 60}px`;
+      scrollElement.addEventListener(
+        'scroll',
+        debounce(this.handleRefreshItems, 50),
+      );
     },
   });
 
   virtualizedContentRef = createRef<HTMLDivElement>();
 
-  get itemsCount() {
-    const clientHeight =
-      this.contentRef.meta.scrollbar?.getScrollElement()?.clientHeight ?? 0;
-    if (!clientHeight) {
-      return 0;
-    }
-    return Math.round(clientHeight / 22) + 8 + 4;
+  @computed
+  get virtualHeight() {
+    return this.payload.devtools.listItems.length * 22;
   }
 
-  get items() {
-    const listItems: ListItem<any>[] = [];
+  get itemNodes(): ReactNode[] {
+    const result: ReactNode[] = [];
 
     for (let virtIndex = 0; virtIndex < this.itemsCount; virtIndex++) {
       const i = this.offsetIndex + virtIndex;
       const listItem = this.payload.devtools.listItems[i];
-      if (listItem) {
-        listItem.metaData.i = i;
-        listItems.push(listItem);
+      const component = listItemRenderersMap.get(listItem?.constructor);
+
+      if (component) {
+        result.push(createElement(component, { item: listItem }));
       }
     }
 
-    return listItems;
+    return result;
   }
 
   handleRefreshItems = () => {
@@ -74,15 +98,14 @@ export class DevtoolsContentVM extends ViewModelImpl<{
       `translateY(${scrollElement.scrollTop}px)`;
 
     runInAction(() => {
-      this.offsetIndex = Math.floor(scrollElement.scrollTop / 22);
+      this.offsetIndex = Math.ceil(scrollElement.scrollTop / 22);
     });
   };
 
   willMount(): void {
     makeObservable<typeof this, 'offsetIndex'>(this, {
-      itemsCount: computed,
       offsetIndex: observable.ref,
-      items: computed.struct,
+      itemsCount: observable.ref,
     });
   }
 }
