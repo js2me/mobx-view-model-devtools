@@ -1,4 +1,3 @@
-import { debounce } from 'lodash-es';
 import {
   computed,
   makeObservable,
@@ -26,11 +25,16 @@ const listItemRenderersMap = new Map<any, any>([
   [PropertyListItem, PropertyListItemRender],
   [MetaListItem, MetaListItemRender],
 ]);
+
+const ITEM_HEIGHT = 22;
+const BUFFER_SIZE = 10; // Количество дополнительных элементов сверху и снизу для более плавного скролла
+
 export class DevtoolsContentVM extends ViewModelImpl<{
   devtools: ViewModelDevtools;
   ref?: Ref<HTMLDivElement>;
 }> {
-  private offsetIndex = -4;
+  private startIndex = 0;
+  private endIndex = 0;
 
   itemsCount = 0;
 
@@ -47,9 +51,14 @@ export class DevtoolsContentVM extends ViewModelImpl<{
       if (!scrollElement) return;
 
       runInAction(() => {
-        this.itemsCount = Math.round(scrollElement.clientHeight / 22) + 40 + 4;
+        // Увеличиваем количество отображаемых элементов с учетом буфера
+        const visibleItemsCount = Math.ceil(
+          scrollElement.clientHeight / ITEM_HEIGHT,
+        );
+        this.itemsCount = visibleItemsCount + BUFFER_SIZE * 2;
       });
 
+      // Подписываемся на изменения длины списка элементов
       reaction(
         () => this.payload.devtools.listItems.length,
         () => this.handleRefreshItems(),
@@ -57,54 +66,115 @@ export class DevtoolsContentVM extends ViewModelImpl<{
           fireImmediately: true,
         },
       );
-      this.virtualizedContentRef.current!.style.height =
-        `${node.clientHeight - 60}px`;
-      scrollElement.addEventListener(
-        'scroll',
-        debounce(this.handleRefreshItems, 50),
+
+      // Подписываемся на изменения startIndex и endIndex для принудительной перерисовки
+      reaction(
+        () => [this.startIndex, this.endIndex],
+        () => {
+          // Просто триггерим перерасчет itemNodes
+        },
+        {
+          fireImmediately: false,
+        },
       );
+
+      scrollElement.addEventListener('scroll', this.handleRefreshItems);
     },
   });
 
-  virtualizedContentRef = createRef<HTMLDivElement>();
-
   @computed
   get virtualHeight() {
-    return this.payload.devtools.listItems.length * 22;
+    return this.payload.devtools.listItems.length * ITEM_HEIGHT;
   }
 
   get itemNodes(): ReactNode[] {
     const result: ReactNode[] = [];
 
-    for (let virtIndex = 0; virtIndex < this.itemsCount; virtIndex++) {
-      const i = this.offsetIndex + virtIndex;
+    // Обновляем диапазон элементов при каждом рендере
+    this.updateVisibleRange();
+
+    // Добавляем пустой div в начале для смещения (оффсет сверху)
+    if (this.startIndex > 0) {
+      const topOffset = this.startIndex * ITEM_HEIGHT;
+      result.push(
+        createElement('div', {
+          key: 'top-offset',
+          style: { height: `${topOffset}px` },
+        }),
+      );
+    }
+
+    // Рендерим только видимые элементы в нужном диапазоне
+    for (let i = this.startIndex; i < this.endIndex; i++) {
       const listItem = this.payload.devtools.listItems[i];
       const component = listItemRenderersMap.get(listItem?.constructor);
 
       if (component) {
-        result.push(createElement(component, { item: listItem }));
+        result.push(
+          createElement(component, { key: `item-${i}`, item: listItem }),
+        );
       }
+    }
+
+    // Добавляем пустой div в конце для смещения (оффсет снизу)
+    const bottomItemCount =
+      this.payload.devtools.listItems.length - this.endIndex;
+    if (bottomItemCount > 0) {
+      const bottomOffset = bottomItemCount * ITEM_HEIGHT;
+      result.push(
+        createElement('div', {
+          key: 'bottom-offset',
+          style: { height: `${bottomOffset}px` },
+        }),
+      );
     }
 
     return result;
   }
 
-  handleRefreshItems = () => {
+  private updateVisibleRange = () => {
     const scrollElement = this.contentRef.meta.scrollbar?.getScrollElement();
+    if (!scrollElement) {
+      // Если скролл элемент недоступен, показываем первые элементы
+      this.startIndex = 0;
+      this.endIndex = Math.min(
+        this.itemsCount,
+        this.payload.devtools.listItems.length,
+      );
+      return;
+    }
 
-    if (!scrollElement) return;
+    const scrollTop = scrollElement.scrollTop;
+    const visibleStartIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+    const visibleItemsCount = Math.ceil(
+      scrollElement.clientHeight / ITEM_HEIGHT,
+    );
 
-    this.virtualizedContentRef.current!.style.transform =
-      `translateY(${scrollElement.scrollTop}px)`;
+    // Рассчитываем диапазон с учетом буфера
+    const newStartIndex = Math.max(0, visibleStartIndex - BUFFER_SIZE);
+    const newEndIndex = Math.min(
+      this.payload.devtools.listItems.length,
+      visibleStartIndex + visibleItemsCount + BUFFER_SIZE,
+    );
 
-    runInAction(() => {
-      this.offsetIndex = Math.ceil(scrollElement.scrollTop / 22);
-    });
+    // Обновляем значения только если они изменились, чтобы вызвать перерисовку
+    if (this.startIndex !== newStartIndex || this.endIndex !== newEndIndex) {
+      runInAction(() => {
+        this.startIndex = newStartIndex;
+        this.endIndex = newEndIndex;
+      });
+    }
+  };
+
+  handleRefreshItems = () => {
+    // Вызываем обновление диапазона, что должно привести к перерисовке
+    this.updateVisibleRange();
   };
 
   willMount(): void {
-    makeObservable<typeof this, 'offsetIndex'>(this, {
-      offsetIndex: observable.ref,
+    makeObservable<typeof this, 'startIndex' | 'endIndex'>(this, {
+      startIndex: observable.ref,
+      endIndex: observable.ref,
       itemsCount: observable.ref,
     });
   }

@@ -95,15 +95,137 @@ export class ViewModelDevtools {
   get listItems(): ListItem<any>[] {
     const listItems: ListItem<any>[] = [];
 
-    this.rootVmListItems.forEach((vmListItem) => {
-      listItems.push(...vmListItem.expandedChildrenWithSelf);
-    });
+    if (this.searchEngine.isActive) {
+      // When search is active, filter items based on isFitted property
+      this.rootVmListItems.forEach((vmListItem) => {
+        const allChildren = vmListItem.expandedChildrenWithSelf;
+        const filteredChildren = allChildren.filter((item) => item.isFitted);
 
-    this.extraListItems.forEach((listItem) => {
-      listItems.push(...listItem.expandedChildrenWithSelf);
-    });
+        if (filteredChildren.length > 0) {
+          // Add parent items that contain matched children to maintain proper hierarchy
+          const parentItems = this.getParentItemsWithMatchedChildren(
+            vmListItem,
+            filteredChildren,
+          );
+          // Combine parent items and matched children, avoiding duplicates
+          const combinedItems = [
+            ...new Set([...parentItems, ...filteredChildren]),
+          ];
+          // Sort to maintain proper tree order
+          listItems.push(
+            ...combinedItems.sort(
+              (a, b) =>
+                this.getItemPosition(a, combinedItems) -
+                this.getItemPosition(b, combinedItems),
+            ),
+          );
+        }
+      });
+
+      this.extraListItems.forEach((listItem) => {
+        const allChildren = listItem.expandedChildrenWithSelf;
+        const filteredChildren = allChildren.filter((item) => item.isFitted);
+
+        if (filteredChildren.length > 0) {
+          // Add parent items that contain matched children to maintain proper hierarchy
+          const parentItems = this.getParentItemsWithMatchedChildren(
+            listItem,
+            filteredChildren,
+          );
+          // Combine parent items and matched children, avoiding duplicates
+          const combinedItems = [
+            ...new Set([...parentItems, ...filteredChildren]),
+          ];
+          // Sort to maintain proper tree order
+          listItems.push(
+            ...combinedItems.sort(
+              (a, b) =>
+                this.getItemPosition(a, combinedItems) -
+                this.getItemPosition(b, combinedItems),
+            ),
+          );
+        }
+      });
+    } else {
+      // When search is not active, return all items as before
+      this.rootVmListItems.forEach((vmListItem) => {
+        listItems.push(...vmListItem.expandedChildrenWithSelf);
+      });
+
+      this.extraListItems.forEach((listItem) => {
+        listItems.push(...listItem.expandedChildrenWithSelf);
+      });
+    }
 
     return listItems;
+  }
+
+  // Helper method to get parent items that contain matched children
+  private getParentItemsWithMatchedChildren(
+    rootItem: ListItem<any>,
+    matchedChildren: ListItem<any>[],
+  ): ListItem<any>[] {
+    const parentItems: ListItem<any>[] = [rootItem]; // Always include the root item
+
+    // Add intermediate parent items that are in the path to matched children
+    for (const matchedChild of matchedChildren) {
+      let current: ListItem<any> | undefined = matchedChild;
+
+      // Traverse up the hierarchy from the matched child to the root
+      while (current && current !== rootItem) {
+        // Try to find the parent of current item by checking if it's in the children of rootItem or its descendants
+        const parent = this.findParent(rootItem, current);
+        if (parent && !parentItems.includes(parent)) {
+          parentItems.push(parent);
+        }
+        current = parent;
+      }
+    }
+
+    return parentItems;
+  }
+
+  // Helper method to find the parent of a specific item within a root item
+  private findParent(
+    rootItem: ListItem<any>,
+    targetItem: ListItem<any>,
+  ): ListItem<any> | undefined {
+    // Check if targetItem is a direct child of rootItem
+    if (rootItem.children.includes(targetItem)) {
+      return rootItem;
+    }
+
+    // Recursively check each child's subtree
+    for (const child of rootItem.children) {
+      if (child.children.includes(targetItem)) {
+        return child;
+      }
+
+      const result = this.findParent(child, targetItem);
+      if (result) {
+        return result;
+      }
+    }
+
+    return undefined;
+  }
+
+  // Helper method to get the position of an item in the overall list
+  private getItemPosition(
+    item: ListItem<any>,
+    allItems: ListItem<any>[],
+  ): number {
+    // Return the index of the item in the original expandedChildrenWithSelf array
+    // to maintain proper ordering
+    for (const rootItem of [...this.rootVmListItems, ...this.extraListItems]) {
+      const flatList = rootItem.expandedChildrenWithSelf;
+      const index = flatList.indexOf(item);
+      if (index !== -1) {
+        return index;
+      }
+    }
+
+    return Number.MAX_SAFE_INTEGER; // Fallback for items not found
   }
 
   get isActive() {
