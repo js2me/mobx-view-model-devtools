@@ -125,3 +125,37 @@ if (import.meta.env.DEV) {
   document.head.appendChild(script);
 }
 ```
+
+## Property editing behavior
+
+Observable properties use ordinary assignments and collection operations inside a
+MobX action. Existing setters, enhancers, interceptors and reaction batching remain
+in effect. Edits inside plain ref/shallow values notify their nearest observable
+owner; they do not refresh every ViewModel or call payload lifecycle methods.
+
+Editing a computed explicitly pins an override, including computed properties with
+a setter. The computed keeps its original atom and tracks an observable override
+value. Editing a nested plain snapshot pins its nearest computed owner. Observable
+objects returned by a computed are edited in place: the parent computed can still
+replace them when its dependencies change.
+
+Set rows follow value identity, independently of insertion index. For direct Set edits, replacing a
+member only adds the replacement and removes the old member; unchanged members keep
+their normal order and notifications. Editing to an existing member merges rows.
+Custom interceptors remain authoritative: if removal and rollback are both rejected,
+the editor reports that both members were retained.
+
+Computed overrides require a small compatibility adapter for MobX 6 internals;
+ordinary writes use native APIs. Tests cover MobX 6.15 and separate copies of the
+same development build sharing MobX's default global state. Prefer a shared MobX
+instance; arbitrary mixtures of minified builds or isolated runtimes are not covered.
+
+## Tests
+
+Run `pnpm test` for the property editing UI tests, or `pnpm test:watch` during development.
+The tests render the production devtools rows in jsdom and interact with Edit,
+Apply, Cancel, Toggle and keyboard controls. They check the underlying MobX values
+and separate observer components, including computed dependency graphs, native
+notifications, stable Set rows, shallow values and independent MobX bundles.
+Preview sizing and full-panel browser layout are outside this suite's scope.
+Run `pnpm exec tsc -p tsconfig.test.json` to type-check the test setup.

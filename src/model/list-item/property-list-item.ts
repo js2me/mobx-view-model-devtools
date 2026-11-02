@@ -1,4 +1,13 @@
-import { Check, Copy, Eye, EyeSlash, Pencil, Play, ToggleOn, Xmark } from '@gravity-ui/icons';
+import {
+  Check,
+  Copy,
+  Eye,
+  EyeSlash,
+  Pencil,
+  Play,
+  ToggleOn,
+  Xmark,
+} from '@gravity-ui/icons';
 import {
   action,
   computed,
@@ -8,24 +17,28 @@ import {
 } from 'mobx';
 import type { Maybe } from 'yummies/types';
 import {
+  type CollectionKind,
   getCollectionKind,
   getMapEntryAt,
   getSetValueAt,
-  type CollectionKind,
 } from '../utils/collection-like';
 import { createDatePreviewChildren } from '../utils/create-date-preview-children';
 import { formatSearchSegmentKey } from '../utils/format-search-key';
 import { getAllKeys } from '../utils/get-all-keys';
 import {
-  getConstructorName,
-  isInaccessible,
-  INACCESSIBLE,
-} from '../utils/safe-access';
-import { sortPropertyListItems } from '../utils/sort-property-keys';
-import {
   PropertyWatcher,
   type PropertyWatchHistoryEntry,
 } from '../utils/property-watcher';
+import {
+  getConstructorName,
+  INACCESSIBLE,
+  isInaccessible,
+} from '../utils/safe-access';
+import {
+  getSetEntryIdentities,
+  type SetEntryIdentity,
+} from '../utils/set-entry-identity';
+import { sortPropertyListItems } from '../utils/sort-property-keys';
 import type { ViewModelDevtools } from '../view-model-devtools';
 import { ListItem, type ListItemOperation } from './list-item';
 import { MetaListItem } from './meta-list-item';
@@ -78,7 +91,7 @@ export class PropertyListItem extends ListItem<any> {
       return undefined;
     }
 
-    if (!this.property) {
+    if (this.property == null) {
       return undefined;
     }
 
@@ -106,8 +119,41 @@ export class PropertyListItem extends ListItem<any> {
     return getMapEntryAt(parentData, this.collectionEntryIndex)?.[0];
   }
 
+  get collectionEntryIndex(): number | undefined {
+    if (!this.setEntryIdentity) return this.entryIndex;
+    const data = this.parent.data;
+    if (getCollectionKind(data) !== 'set') return undefined;
+    const values = [...data.values()];
+    return values.findIndex(
+      (value) =>
+        Object.is(value, this.setEntryIdentity!.value) ||
+        value === this.setEntryIdentity!.value,
+    );
+  }
+
+  get property() {
+    return this.setEntryIdentity
+      ? String(this.collectionEntryIndex)
+      : this.propertyKey;
+  }
+
+  get path(): string {
+    if (this.parent instanceof PropertyListItem) {
+      return this.collectionEntryKind
+        ? `${this.parent.path}[${this.collectionEntryIndex}]`
+        : `${this.parent.path}.${this.property}`;
+    }
+    return this.propertyPath;
+  }
+
+  get order() {
+    return this.setEntryIdentity
+      ? (this.collectionEntryIndex ?? this.itemOrder)
+      : this.itemOrder;
+  }
+
   get descriptor() {
-    if (!this.property) {
+    if (this.property == null) {
       return null;
     }
 
@@ -127,7 +173,7 @@ export class PropertyListItem extends ListItem<any> {
 
   get stringifiedDataType() {
     if (this.isInaccessible) {
-      return '[object Inaccessible]'
+      return '[object Inaccessible]';
     }
     return Object.prototype.toString.call(this.data);
   }
@@ -282,27 +328,20 @@ export class PropertyListItem extends ListItem<any> {
     }
 
     if (collectionKind === 'set') {
-      const items: PropertyListItem[] = [];
-      let index = 0;
-
-      for (const _ of data.values()) {
-        items.push(
-          PropertyListItem.create(
-            this.devtools,
-            String(index),
-            `${this.path}[${index}]`,
-            index,
-            this,
-            {
-              collectionEntryKind: 'set',
-              collectionEntryIndex: index,
-            },
-          ),
-        );
-        index++;
-      }
-
-      return items;
+      return getSetEntryIdentities(this, data).map((identity, index) =>
+        PropertyListItem.create(
+          this.devtools,
+          String(index),
+          `${this.path}[${index}]`,
+          index,
+          this,
+          {
+            collectionEntryKind: 'set',
+            collectionEntryIndex: index,
+            setEntryIdentity: identity,
+          },
+        ),
+      );
     }
 
     return [];
@@ -350,15 +389,18 @@ export class PropertyListItem extends ListItem<any> {
     }
 
     if (data && typeof data === 'object') {
-      return getAllKeys(data).map((property, order) => {
-        return PropertyListItem.create(
-          this.devtools,
-          property,
-          `${this.path}.${property}`,
-          order,
-          this,
-        );
-      });
+      return [
+        ...this.getCollectionEntryChildren(),
+        ...getAllKeys(data).map((property, order) => {
+          return PropertyListItem.create(
+            this.devtools,
+            property,
+            `${this.path}.${property}`,
+            order,
+            this,
+          );
+        }),
+      ];
     }
 
     return [];
@@ -631,16 +673,25 @@ export class PropertyListItem extends ListItem<any> {
 
   protected constructor(
     devtools: ViewModelDevtools,
-    public property: Maybe<string>,
-    public path: string,
-    public order: number,
+    private propertyKey: Maybe<string>,
+    private propertyPath: string,
+    private itemOrder: number,
     private parent: ListItem<any>,
     public collectionEntryKind?: CollectionKind,
-    public collectionEntryIndex?: number,
+    private entryIndex?: number,
     public getPreview?: () => unknown,
+    public readonly setEntryIdentity?: SetEntryIdentity,
   ) {
-    super(devtools, PropertyListItem.createKey(parent, property), undefined);
+    super(
+      devtools,
+      PropertyListItem.createKey(parent, propertyKey, setEntryIdentity),
+      undefined,
+    );
 
+    computed(this, 'order');
+    computed(this, 'property');
+    computed(this, 'path');
+    computed(this, 'collectionEntryIndex');
     computed(this, 'type');
     computed(this, 'searchData');
     computed(this, 'propertyClosingTag');
@@ -659,7 +710,12 @@ export class PropertyListItem extends ListItem<any> {
     makeObservable(this);
   }
 
-  static createKey(parent: ListItem<any>, property: Maybe<string>) {
+  static createKey(
+    parent: ListItem<any>,
+    property: Maybe<string>,
+    identity?: SetEntryIdentity,
+  ) {
+    if (identity) return `${parent.key}/set-entry/${identity.id}`;
     return `${parent.key}-${property}`;
   }
 
@@ -673,10 +729,11 @@ export class PropertyListItem extends ListItem<any> {
       collectionEntryKind?: CollectionKind;
       collectionEntryIndex?: number;
       getPreview?: () => unknown;
+      setEntryIdentity?: SetEntryIdentity;
     },
   ) {
     const cache = parent.cache ?? devtools.anyCache;
-    const key = `${PropertyListItem.createKey(parent, property)}/list-item`;
+    const key = `${PropertyListItem.createKey(parent, property, options?.setEntryIdentity)}/list-item`;
 
     let item: Maybe<PropertyListItem> = cache.get(key);
 
@@ -690,6 +747,7 @@ export class PropertyListItem extends ListItem<any> {
         options?.collectionEntryKind,
         options?.collectionEntryIndex,
         options?.getPreview,
+        options?.setEntryIdentity,
       );
       cache.set(key, item);
 
