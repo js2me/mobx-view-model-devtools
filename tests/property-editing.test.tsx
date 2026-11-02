@@ -337,12 +337,12 @@ describe('editing edge cases through devtools rows', () => {
     const model = observable({ entries: new Set(['old', 'keep']) });
     const ui = inspect(model, ['entries', '0'], () => [...model.entries]);
     await ui.edit('"new"', 'Apply');
-    expect([...model.entries]).toEqual(['new', 'keep']);
-    ui.expectApp(['new', 'keep']);
+    expect([...model.entries]).toEqual(['keep', 'new']);
+    ui.expectApp(['keep', 'new']);
     expect(ui.row.getByText('"new"')).toBeInTheDocument();
     await ui.edit('"again"');
-    expect([...model.entries]).toEqual(['again', 'keep']);
-    ui.expectApp(['again', 'keep']);
+    expect([...model.entries]).toEqual(['keep', 'again']);
+    ui.expectApp(['keep', 'again']);
     expect(ui.notifications).toEqual([]);
   });
 });

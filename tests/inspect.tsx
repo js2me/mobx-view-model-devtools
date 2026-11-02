@@ -15,7 +15,11 @@ export function inspect<T extends object>(
   model: T,
   path: string[],
   read: () => unknown,
-  options: { additionalPaths?: string[][]; viewModels?: object[] } = {},
+  options: {
+    additionalPaths?: string[][];
+    viewModels?: object[];
+    siblings?: boolean;
+  } = {},
 ) {
   const notifications: { title: string }[] = [];
   const devtools = {
@@ -50,16 +54,28 @@ export function inspect<T extends object>(
     }
     return parent as PropertyListItem;
   }
-  const item = findItem(path);
   const App = observer(() => (
     <output data-testid="app">{JSON.stringify(read())}</output>
   ));
+  render(<App />);
+  const item = findItem(path);
+  const Siblings = observer(() => (
+    <section data-testid="siblings">
+      {item.parentListItem.children.map((child) =>
+        child instanceof PropertyListItem ? (
+          <div key={child.key} data-row-id={child.key}>
+            <PropertyListItemRender item={child} />
+          </div>
+        ) : null,
+      )}
+    </section>
+  ));
   render(
     <>
-      <App />
       <section data-testid="row">
         <PropertyListItemRender item={item} />
       </section>
+      {options.siblings ? <Siblings /> : null}
       {options.additionalPaths?.map((path) => (
         <section key={JSON.stringify(path)} data-testid={JSON.stringify(path)}>
           <PropertyListItemRender item={findItem(path)} />

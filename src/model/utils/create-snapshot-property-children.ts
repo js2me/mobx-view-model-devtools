@@ -1,13 +1,11 @@
 import type { ListItem } from '../list-item/list-item';
 import { PropertyListItem } from '../list-item/property-list-item';
 import type { ViewModelDevtools } from '../view-model-devtools';
+import { type CollectionKind, getCollectionKind } from './collection-like';
 import { createDatePreviewChildren } from './create-date-preview-children';
-import {
-  getCollectionKind,
-  type CollectionKind,
-} from './collection-like';
 import { getAllKeys } from './get-all-keys';
 import { isInaccessible } from './safe-access';
+import { getSetEntryIdentities } from './set-entry-identity';
 import { sortPropertyListItems } from './sort-property-keys';
 
 const createCollectionEntryChildren = (
@@ -43,11 +41,8 @@ const createCollectionEntryChildren = (
   }
 
   if (collectionKind === 'set') {
-    const items: PropertyListItem[] = [];
-    let index = 0;
-
-    for (const _ of (data as Set<unknown>).values()) {
-      items.push(
+    return getSetEntryIdentities(parent, data as Set<unknown>).map(
+      (identity, index) =>
         PropertyListItem.create(
           devtools,
           String(index),
@@ -57,13 +52,10 @@ const createCollectionEntryChildren = (
           {
             collectionEntryKind: 'set',
             collectionEntryIndex: index,
+            setEntryIdentity: identity,
           },
         ),
-      );
-      index++;
-    }
-
-    return items;
+    );
   }
 
   return [];

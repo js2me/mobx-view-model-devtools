@@ -1,33 +1,42 @@
-import { isObservableArray, untracked } from 'mobx';
+import { untracked } from 'mobx';
 import { PropertyListItem } from '../list-item/property-list-item';
 import {
   getCollectionKind,
   isMobxObservableMap,
   isMobxObservableSet,
 } from './collection-like';
-import {
-  findMobxAdministration,
-  isMobxComputedProperty,
-} from './mobx-administration';
 import type { MapLike, SetLike } from './mobx-collection';
+import {
+  hasMobxObject,
+  isMobxComputedProperty,
+  isObservableArrayOwner,
+} from './mobx-edit-adapter';
+import type { SetEntryIdentity } from './set-entry-identity';
 
 export type ComputedProducerTarget = {
   host: object;
   key: string;
   value: unknown;
+  identityUpdates: SetEntryUpdate[];
 };
+
+type SetEntryUpdate = { entry: SetEntryIdentity; value: unknown };
 
 type EditSegment =
   | { kind: 'property'; key: string }
   | { kind: 'map'; key: unknown }
-  | { kind: 'set'; index: number };
+  | { kind: 'set'; index: number; identity?: SetEntryIdentity };
 
 function editSegment(item: PropertyListItem): EditSegment {
   if (item.collectionEntryKind === 'map') {
     return { kind: 'map', key: item.mapEntryKey };
   }
   if (item.collectionEntryKind === 'set') {
-    return { kind: 'set', index: item.collectionEntryIndex! };
+    return {
+      kind: 'set',
+      index: item.collectionEntryIndex!,
+      identity: item.setEntryIdentity,
+    };
   }
   return { kind: 'property', key: item.property! };
 }
@@ -36,6 +45,7 @@ function applyNestedEdit(
   value: unknown,
   segments: EditSegment[],
   parsed: unknown,
+  updates: SetEntryUpdate[],
 ): unknown {
   if (segments.length === 0) {
     return parsed;
@@ -47,7 +57,10 @@ function applyNestedEdit(
       throw new Error('Map entry was not found');
     const next = new Map((value as MapLike).entries());
     if (!next.has(segment.key)) throw new Error('Map entry was not found');
-    next.set(segment.key, applyNestedEdit(next.get(segment.key), rest, parsed));
+    next.set(
+      segment.key,
+      applyNestedEdit(next.get(segment.key), rest, parsed, updates),
+    );
     return next;
   }
   if (segment.kind === 'set') {
@@ -60,7 +73,11 @@ function applyNestedEdit(
       values[segment.index],
       rest,
       parsed,
+      updates,
     );
+    const nextValue = values[segment.index];
+    if (segment.identity)
+      updates.push({ entry: segment.identity, value: nextValue });
     return new Set(values);
   }
   const head = segment.key;
@@ -69,7 +86,12 @@ function applyNestedEdit(
     // slice preserves sparse entries; copying enumerable properties keeps
     // custom keys (including an empty key) when editing another array member.
     const next = Object.assign(value.slice(), value);
-    const nextValue = applyNestedEdit(Reflect.get(value, head), rest, parsed);
+    const nextValue = applyNestedEdit(
+      Reflect.get(value, head),
+      rest,
+      parsed,
+      updates,
+    );
     if (!Reflect.set(next, head, nextValue)) {
       throw new Error(`Cannot update array property "${head}"`);
     }
@@ -83,6 +105,7 @@ function applyNestedEdit(
         (value as Record<string, unknown>)[head],
         rest,
         parsed,
+        updates,
       ),
     };
   }
@@ -95,9 +118,9 @@ function applyNestedEdit(
 }
 
 /**
- * Pin the nearest computed snapshot on the edited path. Observable owners
- * are stable edit targets of their own; copying them into an outer snapshot
- * would detach shared state and discard class prototypes and computed getters.
+ * Pin the nearest plain computed snapshot on the edited path. Observable
+ * values are edited in place, retaining their owner's dependencies. If that
+ * owner later creates a new value, its normal recomputation remains authoritative.
  */
 export function resolveComputedProducerForEdit(
   item: PropertyListItem,
@@ -112,8 +135,8 @@ export function resolveComputedProducerForEdit(
 
   while (current instanceof PropertyListItem && current.property != null) {
     if (
-      findMobxAdministration(current.data) ||
-      isObservableArray(current.data) ||
+      hasMobxObject(current.data) ||
+      isObservableArrayOwner(current.data) ||
       isMobxObservableMap(current.data) ||
       isMobxObservableSet(current.data)
     ) {
@@ -124,30 +147,19 @@ export function resolveComputedProducerForEdit(
     const key = current.property;
     if (isMobxComputedProperty(host, key)) {
       const rootValue = untracked(() => Reflect.get(host, key));
-      return { host, key, value: applyNestedEdit(rootValue, segments, parsed) };
+      const updates: SetEntryUpdate[] = [];
+      const value = applyNestedEdit(rootValue, segments, parsed, updates);
+      return { host, key, value, identityUpdates: updates };
     }
 
     // An observable field (including observable.ref) owns the value below it.
     // Editing that value must not pin a computed higher up the inspector tree.
-    if (findMobxAdministration(host)) {
+    if (hasMobxObject(host)) {
       return null;
     }
 
     segments.unshift(editSegment(current));
     current = current.parentListItem;
-  }
-
-  return null;
-}
-
-export function findMobxComputedPropertyHost(
-  object: object,
-  key: string,
-): { host: object; key: string } | null {
-  const adm = findMobxAdministration(object);
-
-  if (adm && isMobxComputedProperty(object, key)) {
-    return { host: object, key };
   }
 
   return null;

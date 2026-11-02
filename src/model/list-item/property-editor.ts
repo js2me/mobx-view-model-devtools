@@ -1,19 +1,16 @@
 import { action, computed, makeObservable, observable } from 'mobx';
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react';
 import type { Maybe } from 'yummies/types';
-import type { AnyVM } from '../types';
 import type { CollectionKind } from '../utils/collection-like';
+import {
+  isMobxObservableMap,
+  isMobxObservableSet,
+} from '../utils/collection-like';
 import { formatSearchSegmentKey } from '../utils/format-search-key';
 import {
-  invalidateMobxObject,
-  invalidateMobxProperty,
-  invalidateViewModelsAfterEdit,
-} from '../utils/invalidate-view-models-after-edit';
-import {
-  ensureMobxPropertyAtomLoaded,
-  findMobxAdministration,
-} from '../utils/mobx-administration';
-import { notifyMobxEditPropagation } from '../utils/notify-mobx-change';
+  notifyMapEntryOwner,
+  notifyPropertyOwner,
+} from '../utils/mobx-edit-adapter';
 import { resolveComputedProducerForEdit } from '../utils/resolve-computed-producer';
 import { isInaccessible } from '../utils/safe-access';
 import {
@@ -23,7 +20,6 @@ import {
 import { setPropertyValue } from '../utils/set-property-value';
 import type { ViewModelDevtools } from '../view-model-devtools';
 import { PropertyListItem } from './property-list-item';
-import { VMListItem } from './vm-list-item';
 
 export interface PropertyEditorHost {
   readonly property: Maybe<string>;
@@ -40,12 +36,6 @@ export interface PropertyEditorHost {
   readonly parentListItem: any;
   readonly devtools: ViewModelDevtools;
   reportDataChanged(): void;
-}
-
-function registerEditedHost(hosts: object[], host: object) {
-  if (!hosts.includes(host)) {
-    hosts.push(host);
-  }
 }
 
 function formatEditError(error: unknown) {
@@ -233,7 +223,7 @@ export class PropertyEditor {
       return false;
     }
 
-    this.notifyHostAppAfterEdit(result.producerTarget);
+    if (!result.notifies) this.notifyNearestObservableOwner();
     this.reportDataChangedUpwards();
     return true;
   }
@@ -250,7 +240,7 @@ export class PropertyEditor {
   private applyParsedEdit(parsed: unknown): {
     ok: boolean;
     error?: string;
-    producerTarget?: { host: object; key: string };
+    notifies?: boolean;
   } {
     const h = this.host;
 
@@ -266,19 +256,33 @@ export class PropertyEditor {
         producerTarget.value,
       );
 
-      return result.ok
-        ? { ok: true, producerTarget }
-        : { ok: false, error: result.error };
+      if (!result.ok) return result;
+      for (const { entry, value } of producerTarget.identityUpdates)
+        entry.rebind(value);
+      return result;
     }
 
     if (h.collectionEntryKind === 'map') {
       const key = h.mapEntryKey;
 
-      return setMapEntryValue(h.parentListItem.data, key, parsed);
+      return {
+        ...setMapEntryValue(h.parentListItem.data, key, parsed),
+        notifies: isMobxObservableMap(h.parentListItem.data),
+      };
     }
 
     if (h.collectionEntryKind === 'set') {
-      return setSetEntryValue(h.parentListItem.data, h.data, parsed);
+      const oldValue =
+        h instanceof PropertyListItem && h.setEntryIdentity
+          ? h.setEntryIdentity.value
+          : h.data;
+      const result = setSetEntryValue(h.parentListItem.data, oldValue, parsed);
+      if (result.ok && h instanceof PropertyListItem)
+        h.setEntryIdentity?.rebind(result.value);
+      return {
+        ...result,
+        notifies: isMobxObservableSet(h.parentListItem.data),
+      };
     }
 
     if (h.property == null) {
@@ -287,7 +291,7 @@ export class PropertyEditor {
 
     const result = setPropertyValue(h.parentListItem.data, h.property, parsed);
 
-    return result.ok ? { ok: true } : { ok: false, error: result.error };
+    return result;
   }
 
   private parseEditContent(): unknown {
@@ -333,141 +337,24 @@ export class PropertyEditor {
     }
   }
 
-  private notifyHostAppAfterEdit(producerTarget?: {
-    host: object;
-    key: string;
-  }) {
-    const h = this.host;
-    if (h.property === undefined) {
-      return;
-    }
-
-    const editedHosts: object[] = [];
-    const pathFromVm = this.buildMobxPathFromVm(producerTarget);
-
-    if (producerTarget) {
-      registerEditedHost(editedHosts, producerTarget.host);
-      invalidateMobxProperty(producerTarget.host, producerTarget.key);
-
-      const nestedInfo = (producerTarget.host as { info?: object }).info;
-
-      if (nestedInfo && typeof nestedInfo === 'object') {
-        registerEditedHost(editedHosts, nestedInfo);
-        invalidateMobxProperty(nestedInfo, producerTarget.key);
-      }
-    } else if (h.collectionEntryKind != null) {
-      registerEditedHost(editedHosts, h.parentListItem.data);
-      invalidateMobxObject(h.parentListItem.data);
-    } else if (h.property != null) {
-      registerEditedHost(editedHosts, h.parentListItem.data);
-      invalidateMobxProperty(h.parentListItem.data, h.property);
-    }
-
-    let ancestor: any = h.parentListItem;
-
-    while (ancestor instanceof PropertyListItem) {
-      if (ancestor.property != null) {
-        invalidateMobxProperty(ancestor.parentListItem.data, ancestor.property);
-      }
-
-      if (
-        ancestor.parentListItem.data &&
-        typeof ancestor.parentListItem.data === 'object'
-      ) {
-        registerEditedHost(editedHosts, ancestor.parentListItem.data);
-      }
-
-      ancestor = ancestor.parentListItem;
-    }
-
-    if (ancestor instanceof VMListItem) {
-      registerEditedHost(editedHosts, ancestor.data);
-      invalidateMobxObject(ancestor.data);
-
-      try {
-        this.refreshViewModelPayload(ancestor.data);
-      } catch {
-        // App ViewModel may use a separate mobx-view-model bundle.
-      }
-    }
-
-    this.bootstrapViewModelAdministrations();
-
-    const editedHost =
-      producerTarget?.host ??
-      (h.property != null ? h.parentListItem.data : undefined);
-
-    let relatedVms: object[] = [];
-
-    if (editedHost && typeof editedHost === 'object') {
-      relatedVms = invalidateViewModelsAfterEdit({
-        editedHost,
-        editedPropertyKey: producerTarget?.key,
-        pathFromAncestorVm: pathFromVm,
-        viewModels: h.devtools.allVms,
-      });
-    }
-
-    notifyMobxEditPropagation({
-      editedHosts,
-      relatedViewModels: relatedVms,
-    });
-
-    for (const vm of relatedVms) {
-      try {
-        this.refreshViewModelPayload(vm);
-      } catch {
-        // App ViewModel may use a separate mobx-view-model bundle.
-      }
-    }
-  }
-
-  private buildMobxPathFromVm(producerTarget?: { key: string }) {
-    const segments: string[] = [];
-    let current: any = this.host;
-
+  private notifyNearestObservableOwner() {
+    let current = this.host;
     while (current instanceof PropertyListItem) {
-      if (current.property != null) {
-        segments.unshift(current.property);
-      }
-
-      current = current.parentListItem;
-    }
-
-    if (segments.length === 0) {
-      return segments;
-    }
-
-    if (producerTarget) {
-      return segments.slice(0, -1);
-    }
-
-    return segments.slice(0, -1);
-  }
-
-  private refreshViewModelPayload(vm: AnyVM) {
-    if (!('setPayload' in vm) || typeof vm.setPayload !== 'function') {
-      return;
-    }
-
-    if (!('payload' in vm)) {
-      return;
-    }
-
-    const payload = (vm as { payload: unknown }).payload;
-
-    if (payload === null || typeof payload !== 'object') {
-      return;
-    }
-
-    vm.setPayload(Array.isArray(payload) ? [...payload] : { ...payload });
-  }
-
-  private bootstrapViewModelAdministrations() {
-    for (const vm of this.host.devtools.allVms) {
-      ensureMobxPropertyAtomLoaded(vm, '_payload');
-      ensureMobxPropertyAtomLoaded(vm, 'payload');
-      findMobxAdministration(vm);
+      if (
+        current.collectionEntryKind === 'map' &&
+        notifyMapEntryOwner(current.parentListItem.data, current.mapEntryKey)
+      )
+        return;
+      if (
+        notifyPropertyOwner(
+          current.parentListItem.data,
+          current.property ?? undefined,
+        )
+      )
+        return;
+      const parent = current.parentListItem;
+      if (!(parent instanceof PropertyListItem)) return;
+      current = parent;
     }
   }
 
