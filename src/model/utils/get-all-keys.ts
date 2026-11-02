@@ -42,6 +42,15 @@ export function getAllKeys(instance: any): string[] {
 
 function collectKeys(instance: any): string[] {
   const keysSet = new Set<string>(Object.keys(instance));
+  // MobX computed getters on object literals are non-enumerable own
+  // accessors, so Object.keys alone hides them from the inspector.
+  for (const [key, descriptor] of Object.entries(
+    Object.getOwnPropertyDescriptors(instance),
+  )) {
+    if (descriptor.get && !ignoredKeys.has(key)) {
+      keysSet.add(key);
+    }
+  }
   let currentPrototype = Object.getPrototypeOf(instance);
 
   while (currentPrototype) {
@@ -67,7 +76,7 @@ function collectKeys(instance: any): string[] {
       break;
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     if (ignoredPrototypes.has(nextPrototype)) {
       break;
     }
@@ -78,4 +87,3 @@ function collectKeys(instance: any): string[] {
   // Array.from(set) returns [set] instead of set values.
   return [...keysSet];
 }
-

@@ -1,4 +1,13 @@
-import { Check, Copy, Eye, EyeSlash, Pencil, Play, ToggleOn, Xmark } from '@gravity-ui/icons';
+import {
+  Check,
+  Copy,
+  Eye,
+  EyeSlash,
+  Pencil,
+  Play,
+  ToggleOn,
+  Xmark,
+} from '@gravity-ui/icons';
 import {
   action,
   computed,
@@ -8,24 +17,24 @@ import {
 } from 'mobx';
 import type { Maybe } from 'yummies/types';
 import {
+  type CollectionKind,
   getCollectionKind,
   getMapEntryAt,
   getSetValueAt,
-  type CollectionKind,
 } from '../utils/collection-like';
 import { createDatePreviewChildren } from '../utils/create-date-preview-children';
 import { formatSearchSegmentKey } from '../utils/format-search-key';
 import { getAllKeys } from '../utils/get-all-keys';
 import {
-  getConstructorName,
-  isInaccessible,
-  INACCESSIBLE,
-} from '../utils/safe-access';
-import { sortPropertyListItems } from '../utils/sort-property-keys';
-import {
   PropertyWatcher,
   type PropertyWatchHistoryEntry,
 } from '../utils/property-watcher';
+import {
+  getConstructorName,
+  INACCESSIBLE,
+  isInaccessible,
+} from '../utils/safe-access';
+import { sortPropertyListItems } from '../utils/sort-property-keys';
 import type { ViewModelDevtools } from '../view-model-devtools';
 import { ListItem, type ListItemOperation } from './list-item';
 import { MetaListItem } from './meta-list-item';
@@ -78,7 +87,7 @@ export class PropertyListItem extends ListItem<any> {
       return undefined;
     }
 
-    if (!this.property) {
+    if (this.property == null) {
       return undefined;
     }
 
@@ -107,7 +116,7 @@ export class PropertyListItem extends ListItem<any> {
   }
 
   get descriptor() {
-    if (!this.property) {
+    if (this.property == null) {
       return null;
     }
 
@@ -127,7 +136,7 @@ export class PropertyListItem extends ListItem<any> {
 
   get stringifiedDataType() {
     if (this.isInaccessible) {
-      return '[object Inaccessible]'
+      return '[object Inaccessible]';
     }
     return Object.prototype.toString.call(this.data);
   }

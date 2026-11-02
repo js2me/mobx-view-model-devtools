@@ -1,29 +1,27 @@
-import {
-  action,
-  computed,
-  makeObservable,
-  observable,
-} from 'mobx';
+import { action, computed, makeObservable, observable } from 'mobx';
 import type { ChangeEventHandler, KeyboardEventHandler } from 'react';
 import type { Maybe } from 'yummies/types';
+import type { AnyVM } from '../types';
 import type { CollectionKind } from '../utils/collection-like';
-import type { ViewModelDevtools } from '../view-model-devtools';
 import { formatSearchSegmentKey } from '../utils/format-search-key';
-import { isInaccessible } from '../utils/safe-access';
 import {
   invalidateMobxObject,
   invalidateMobxProperty,
   invalidateViewModelsAfterEdit,
 } from '../utils/invalidate-view-models-after-edit';
-import { notifyMobxEditPropagation } from '../utils/notify-mobx-change';
 import {
   ensureMobxPropertyAtomLoaded,
   findMobxAdministration,
 } from '../utils/mobx-administration';
+import { notifyMobxEditPropagation } from '../utils/notify-mobx-change';
 import { resolveComputedProducerForEdit } from '../utils/resolve-computed-producer';
-import { setMapEntryValue, setSetEntryValue } from '../utils/set-collection-entry-value';
+import { isInaccessible } from '../utils/safe-access';
+import {
+  setMapEntryValue,
+  setSetEntryValue,
+} from '../utils/set-collection-entry-value';
 import { setPropertyValue } from '../utils/set-property-value';
-import type { AnyVM } from '../types';
+import type { ViewModelDevtools } from '../view-model-devtools';
 import { PropertyListItem } from './property-list-item';
 import { VMListItem } from './vm-list-item';
 
@@ -131,7 +129,7 @@ export class PropertyEditor {
           case 'symbol':
             return `Symbol(${Symbol.keyFor(h.data as symbol) || ''})`;
           case 'string':
-            return `"${String(h.data)}"`;
+            return JSON.stringify(h.data);
         }
 
         return String(h.data);
@@ -221,7 +219,12 @@ export class PropertyEditor {
   }
 
   private commitParsedEdit(parsed: unknown): boolean {
-    const result = this.applyParsedEdit(parsed);
+    let result: ReturnType<PropertyEditor['applyParsedEdit']>;
+    try {
+      result = this.applyParsedEdit(parsed);
+    } catch (error) {
+      result = { ok: false, error: formatEditError(error) };
+    }
 
     if (!result.ok) {
       this.host.devtools.notifications.push({
@@ -253,10 +256,6 @@ export class PropertyEditor {
 
     if (h.collectionEntryKind === 'map') {
       const key = h.mapEntryKey;
-
-      if (key === undefined) {
-        return { ok: false, error: 'Map key is missing' };
-      }
 
       return setMapEntryValue(h.parentListItem.data, key, parsed);
     }
@@ -326,7 +325,7 @@ export class PropertyEditor {
           case 'symbol':
             return `Symbol(${Symbol.keyFor(h.data as symbol) || ''})`;
           case 'string':
-            return `"${String(h.data)}"`;
+            return JSON.stringify(h.data);
         }
 
         return String(h.data);
@@ -368,10 +367,7 @@ export class PropertyEditor {
 
     while (ancestor instanceof PropertyListItem) {
       if (ancestor.property != null) {
-        invalidateMobxProperty(
-          ancestor.parentListItem.data,
-          ancestor.property,
-        );
+        invalidateMobxProperty(ancestor.parentListItem.data, ancestor.property);
       }
 
       if (

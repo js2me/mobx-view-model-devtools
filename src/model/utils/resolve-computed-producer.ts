@@ -1,7 +1,7 @@
 import { untracked } from 'mobx';
+import type { ListItem } from '../list-item/list-item';
 import { PropertyListItem } from '../list-item/property-list-item';
 import { VMListItem } from '../list-item/vm-list-item';
-import type { ListItem } from '../list-item/list-item';
 import {
   findMobxAdministration,
   getMobxComputedPropertyKeys,
@@ -63,7 +63,8 @@ function isSameComputedSnapshot(
   }
 
   return computedKeys.every(
-    (key) => key === editedKey || Object.is(computedRecord[key], parentRecord[key]),
+    (key) =>
+      key === editedKey || Object.is(computedRecord[key], parentRecord[key]),
   );
 }
 
@@ -120,7 +121,9 @@ function pickBestComputedProducerCandidate(
     return null;
   }
 
-  return [...candidates].sort((left, right) => right.depth - left.depth)[0] ?? null;
+  return (
+    [...candidates].sort((left, right) => right.depth - left.depth)[0] ?? null
+  );
 }
 
 function findProducerPropertyListItem(
@@ -163,7 +166,9 @@ function collectPathSegmentsFromProducer(
   }
 
   let current: PropertyListItem | null =
-    item.parentListItem instanceof PropertyListItem ? item.parentListItem : null;
+    item.parentListItem instanceof PropertyListItem
+      ? item.parentListItem
+      : null;
 
   while (current && current !== producerItem) {
     if (current.property == null) {
@@ -204,6 +209,12 @@ function applyNestedEdit(
   const [head, ...rest] = segments;
 
   if (Array.isArray(value)) {
+    if (head === 'length' && rest.length === 0) {
+      const next = [...value];
+      next.length = parsed as number;
+      return next;
+    }
+
     const index = Number(head);
 
     if (Number.isNaN(index)) {
@@ -280,7 +291,10 @@ export function resolveComputedProducerForEdit(
 
   const parentItem = item.parentListItem;
 
-  if (!(parentItem instanceof PropertyListItem) || parentItem.property == null) {
+  if (
+    !(parentItem instanceof PropertyListItem) ||
+    parentItem.property == null
+  ) {
     return null;
   }
 

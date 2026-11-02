@@ -70,11 +70,25 @@ export function setSetEntryValue(
         return;
       }
 
-      if (!writableSet.delete(oldValue)) {
+      const values = [...writableSet.values()];
+      if (
+        !values.some(
+          (value) => Object.is(value, oldValue) || value === oldValue,
+        )
+      ) {
         throw new Error('Set entry was not found');
       }
 
-      writableSet.add(newValue);
+      // Rows are keyed by entry index. Keep the edited value at its position
+      // so the row does not suddenly point to the following entry.
+      for (const value of values) {
+        writableSet.delete(value);
+      }
+      for (const value of values) {
+        writableSet.add(
+          Object.is(value, oldValue) || value === oldValue ? newValue : value,
+        );
+      }
     });
     return { ok: true };
   } catch (error) {

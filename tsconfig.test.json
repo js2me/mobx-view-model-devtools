@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["tests", "vitest.config.ts", "types"],
+  "references": []
+}

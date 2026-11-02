@@ -125,3 +125,12 @@ if (import.meta.env.DEV) {
   document.head.appendChild(script);
 }
 ```
+
+## Tests
+
+Run `pnpm test` for the property editing UI tests, or `pnpm test:watch` during development.
+The tests render the production devtools rows in jsdom and interact with Edit,
+Apply, Cancel, Toggle and keyboard controls. They check the underlying MobX values
+and a separate observer component, including computed overrides and nested edits.
+Preview sizing and full-panel browser layout are outside this suite's scope.
+Run `pnpm exec tsc -p tsconfig.test.json` to type-check the test setup.
