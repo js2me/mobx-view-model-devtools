@@ -254,16 +254,6 @@ export class PropertyEditor {
   } {
     const h = this.host;
 
-    if (h.collectionEntryKind === 'map') {
-      const key = h.mapEntryKey;
-
-      return setMapEntryValue(h.parentListItem.data, key, parsed);
-    }
-
-    if (h.collectionEntryKind === 'set') {
-      return setSetEntryValue(h.parentListItem.data, h.data, parsed);
-    }
-
     const producerTarget = resolveComputedProducerForEdit(
       h as PropertyListItem,
       parsed,
@@ -279,6 +269,16 @@ export class PropertyEditor {
       return result.ok
         ? { ok: true, producerTarget }
         : { ok: false, error: result.error };
+    }
+
+    if (h.collectionEntryKind === 'map') {
+      const key = h.mapEntryKey;
+
+      return setMapEntryValue(h.parentListItem.data, key, parsed);
+    }
+
+    if (h.collectionEntryKind === 'set') {
+      return setSetEntryValue(h.parentListItem.data, h.data, parsed);
     }
 
     if (h.property == null) {
@@ -345,10 +345,7 @@ export class PropertyEditor {
     const editedHosts: object[] = [];
     const pathFromVm = this.buildMobxPathFromVm(producerTarget);
 
-    if (h.collectionEntryKind != null) {
-      registerEditedHost(editedHosts, h.parentListItem.data);
-      invalidateMobxObject(h.parentListItem.data);
-    } else if (producerTarget) {
+    if (producerTarget) {
       registerEditedHost(editedHosts, producerTarget.host);
       invalidateMobxProperty(producerTarget.host, producerTarget.key);
 
@@ -358,6 +355,9 @@ export class PropertyEditor {
         registerEditedHost(editedHosts, nestedInfo);
         invalidateMobxProperty(nestedInfo, producerTarget.key);
       }
+    } else if (h.collectionEntryKind != null) {
+      registerEditedHost(editedHosts, h.parentListItem.data);
+      invalidateMobxObject(h.parentListItem.data);
     } else if (h.property != null) {
       registerEditedHost(editedHosts, h.parentListItem.data);
       invalidateMobxProperty(h.parentListItem.data, h.property);

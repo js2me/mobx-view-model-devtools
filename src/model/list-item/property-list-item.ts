@@ -359,15 +359,18 @@ export class PropertyListItem extends ListItem<any> {
     }
 
     if (data && typeof data === 'object') {
-      return getAllKeys(data).map((property, order) => {
-        return PropertyListItem.create(
-          this.devtools,
-          property,
-          `${this.path}.${property}`,
-          order,
-          this,
-        );
-      });
+      return [
+        ...this.getCollectionEntryChildren(),
+        ...getAllKeys(data).map((property, order) => {
+          return PropertyListItem.create(
+            this.devtools,
+            property,
+            `${this.path}.${property}`,
+            order,
+            this,
+          );
+        }),
+      ];
     }
 
     return [];

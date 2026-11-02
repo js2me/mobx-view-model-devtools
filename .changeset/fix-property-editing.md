@@ -9,5 +9,8 @@ Fix observable and computed property editing in the devtools UI:
 - Read properties with empty names correctly and allow editing Map entries whose key is undefined.
 - Apply array length edits inside computed snapshots and report invalid lengths without discarding the input.
 - Preserve Set entry order when editing values so repeated edits target the same row.
+- Edit the nearest computed snapshot while preserving shared observable objects, arrays and service instances exposed by other computed getters.
+- Keep Map and Set snapshots intact when editing entries or nested values, and expose nested collections in the property tree.
+- Preserve sparse array entries and support editing additional array properties inside computed snapshots.
 
-Add 30 UI regression tests covering editing controls, cancellation, validation, nested values, computed overrides and observer updates.
+Add 54 UI regression tests covering editing controls, cancellation, validation, nested values, dependent computed graphs, computed overrides, reaction consistency and observer updates.

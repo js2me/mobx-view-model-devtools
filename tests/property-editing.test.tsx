@@ -1,5 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act } from '@testing-library/react';
 import {
   computed,
   isObservable,
@@ -7,85 +6,8 @@ import {
   observable,
   runInAction,
 } from 'mobx';
-import { observer } from 'mobx-react-lite';
 import { describe, expect, it } from 'vitest';
-import { PropertyListItem } from '@/model/list-item/property-list-item';
-import { VMListItem } from '@/model/list-item/vm-list-item';
-import type { AnyVM } from '@/model/types';
-import type { ViewModelDevtools } from '@/model/view-model-devtools';
-import { PropertyListItemRender } from '@/ui/devtools-content/list-items/property-list-item-render';
-
-// Only the panel shell is replaced: rows, editors, MobX propagation and the
-// application's observer component all run their production implementations.
-function inspect<T extends object>(
-  model: T,
-  path: string[],
-  read: () => unknown,
-) {
-  const notifications: { title: string }[] = [];
-  const devtools = {
-    anyCache: observable.map(),
-    watchedPropertyKeys: [],
-    allVms: [model],
-    sortPropertiesBy: 'none',
-    highlightUpdates: false,
-    notifications: {
-      push: (notification: { title: string }) =>
-        notifications.push(notification),
-    },
-    searchEngine: {
-      isPropertyItemExpanded: () => false,
-      isPropertyItemExpandable: (item: PropertyListItem) =>
-        item.children.length > 0,
-      isItemFitted: () => true,
-    },
-  } as unknown as ViewModelDevtools;
-  let parent: VMListItem | PropertyListItem = new VMListItem(
-    devtools,
-    model as AnyVM,
-    [],
-  );
-  for (const key of path) {
-    const child = parent.children.find(
-      (child) => child instanceof PropertyListItem && child.property === key,
-    );
-    expect(
-      child,
-      `Property ${key} must be discoverable in the devtools tree`,
-    ).toBeInstanceOf(PropertyListItem);
-    parent = child as PropertyListItem;
-  }
-  const item = parent as PropertyListItem;
-  const App = observer(() => (
-    <output data-testid="app">{JSON.stringify(read())}</output>
-  ));
-  render(
-    <>
-      <App />
-      <section data-testid="row">
-        <PropertyListItemRender item={item} />
-      </section>
-    </>,
-  );
-  const row = within(screen.getByTestId('row'));
-  const user = userEvent.setup();
-  return {
-    user,
-    row,
-    notifications,
-    async edit(content: string, submit: 'Enter' | 'Apply' = 'Enter') {
-      await user.click(row.getByTitle('Edit'));
-      const input = row.getByRole('textbox');
-      await user.clear(input);
-      await user.paste(content);
-      if (submit === 'Enter') await user.keyboard('{Enter}');
-      else await user.click(row.getByTitle('Apply'));
-    },
-    expectApp(value: unknown) {
-      expect(screen.getByTestId('app').textContent).toBe(JSON.stringify(value));
-    },
-  };
-}
+import { inspect } from './inspect';
 
 class Model {
   count = 2;
